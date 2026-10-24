@@ -145,14 +145,22 @@ export default function ArtisticParallaxSlider({
           }}
         />
 
-        {/* Low-Opacity Watermark Brand Logo on Hero Background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] sm:w-[540px] md:w-[720px] lg:w-[860px] max-w-[84vw] aspect-[857/543] pointer-events-none select-none z-0 opacity-15 sm:opacity-20 transition-opacity">
+        {/* Luminous High-Opacity Radiant Brand Logo on Hero Background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[580px] md:w-[760px] lg:w-[900px] max-w-[88vw] aspect-[857/543] pointer-events-none select-none z-0 transition-all duration-700">
+          {/* Warm Golden / Caramel Ambient Radiant Backlight */}
+          <div
+            className="absolute inset-0 -m-8 sm:-m-16 rounded-full blur-3xl pointer-events-none opacity-60 dark:opacity-85 transition-opacity"
+            style={{
+              background: "radial-gradient(ellipse at center, rgba(217, 160, 102, 0.45) 0%, rgba(197, 138, 85, 0.25) 45%, transparent 75%)",
+            }}
+          />
+
           <Image
             src="/images/chocii-logo.png"
             alt="chocii 4 u logo watermark"
             fill
-            sizes="(max-width: 640px) 260px, (max-width: 1024px) 720px, 860px"
-            className="object-contain"
+            sizes="(max-width: 640px) 280px, (max-width: 1024px) 760px, 900px"
+            className="object-contain opacity-50 sm:opacity-60 md:opacity-70 dark:opacity-80 dark:sm:opacity-90 filter drop-shadow-[0_0_35px_rgba(217,160,102,0.45)] sm:drop-shadow-[0_0_65px_rgba(217,160,102,0.6)] brightness-110 contrast-105 saturate-115 dark:brightness-130 dark:contrast-115 dark:drop-shadow-[0_0_80px_rgba(217,160,102,0.75)] transition-all duration-500"
             priority
           />
         </div>
@@ -170,22 +178,22 @@ export default function ArtisticParallaxSlider({
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 max-w-full">
               <span className="w-2.5 h-2.5 rounded-full bg-caramel-500 animate-ping shrink-0" />
-              <span className="text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-[0.25em] text-caramel-700 font-black bg-white/95 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-stone-300 shadow-md font-mono max-w-[88vw] truncate">
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-[0.25em] text-caramel-700 font-black bg-white/95 dark:bg-cocoa-900/95 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-stone-300 dark:border-white/10 shadow-md font-mono max-w-[88vw] truncate">
                 ( NEED AMAZING DESSERTS ) • CHOCII 4 U
               </span>
             </div>
 
             {/* Massive Editorial Headline (Iconic High-Contrast Signature with Ambient Halo) */}
-            <h1 className="text-3xl sm:text-6xl lg:text-8xl font-black font-sans tracking-tight text-cocoa-950 uppercase leading-[0.95] sm:leading-[0.92] drop-shadow-[0_2px_12px_rgba(255,255,255,0.95)] break-words">
-              <span className="block drop-shadow-[0_1px_8px_rgba(255,255,255,0.9)]">NEED</span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cocoa-950 via-caramel-700 to-cocoa-950 italic font-serif lowercase my-1 drop-shadow-[0_2px_8px_rgba(255,255,255,0.85)]">
+            <h1 className="text-3xl sm:text-6xl lg:text-8xl font-black font-sans tracking-tight text-cocoa-950 dark:text-cream-100 uppercase leading-[0.95] sm:leading-[0.92] drop-shadow-[0_2px_12px_rgba(255,255,255,0.95)] dark:drop-shadow-[0_2px_16px_rgba(21,10,8,0.95)] break-words">
+              <span className="block drop-shadow-[0_1px_8px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_1px_10px_rgba(21,10,8,0.9)]">NEED</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cocoa-950 via-caramel-700 to-cocoa-950 dark:from-white dark:via-caramel-300 dark:to-white italic font-serif lowercase my-1 drop-shadow-[0_2px_8px_rgba(255,255,255,0.85)] dark:drop-shadow-[0_2px_10px_rgba(21,10,8,0.9)]">
                 amazing
               </span>
-              <span className="block drop-shadow-[0_1px_8px_rgba(255,255,255,0.9)]">DESSERTS</span>
+              <span className="block drop-shadow-[0_1px_8px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_1px_10px_rgba(21,10,8,0.9)]">DESSERTS</span>
             </h1>
 
             {/* Minimalist Subtitle on Clean Bright White Frosted Card */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-white/90 backdrop-blur-md border border-stone-200/90 shadow-md max-w-xl mx-auto space-y-1.5 text-center">
+            <div className="p-5 sm:p-6 rounded-2xl bg-white/90 dark:bg-cocoa-900/90 backdrop-blur-md border border-stone-200/90 dark:border-white/10 shadow-md max-w-xl mx-auto space-y-1.5 text-center">
               <p className="text-xs uppercase tracking-[0.2em] font-mono text-caramel-700 font-bold">
                 “A Little Treat, Just for You.”
               </p>

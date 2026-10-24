@@ -42,14 +42,21 @@ export default function ClientMenuPage({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           {/* Header Banner with 3D Chocolate Floating Atelier */}
           <div className="rounded-3xl border border-stone-200/90 bg-white p-8 sm:p-10 shadow-sm relative overflow-hidden">
-            {/* Low-Opacity Watermark Brand Logo */}
-            <div className="absolute top-1/2 left-1/2 sm:left-1/4 -translate-x-1/2 -translate-y-1/2 w-[240px] sm:w-[500px] max-w-[80vw] aspect-[857/543] pointer-events-none select-none z-0 opacity-12 sm:opacity-15">
+            {/* Radiant Luminous Brand Logo Watermark */}
+            <div className="absolute top-1/2 left-1/2 sm:left-1/4 -translate-x-1/2 -translate-y-1/2 w-[240px] sm:w-[500px] max-w-[80vw] aspect-[857/543] pointer-events-none select-none z-0">
+              {/* Golden Ambient Radiant Glow */}
+              <div
+                className="absolute inset-0 -m-6 rounded-full blur-2xl pointer-events-none opacity-50 dark:opacity-75"
+                style={{
+                  background: "radial-gradient(ellipse at center, rgba(217, 160, 102, 0.4) 0%, rgba(197, 138, 85, 0.2) 50%, transparent 80%)",
+                }}
+              />
               <Image
                 src="/images/chocii-logo.png"
                 alt="chocii 4 u logo watermark"
                 fill
                 sizes="(max-width: 640px) 340px, 500px"
-                className="object-contain"
+                className="object-contain opacity-45 sm:opacity-55 dark:opacity-75 filter drop-shadow-[0_0_30px_rgba(217,160,102,0.4)] brightness-110 contrast-105 saturate-115 dark:brightness-125 dark:drop-shadow-[0_0_60px_rgba(217,160,102,0.7)]"
                 priority
               />
             </div>
