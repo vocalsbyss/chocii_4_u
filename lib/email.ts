@@ -317,13 +317,15 @@ export async function sendOtpEmail({
   const plainText = `Hello ${customerName},\n\nYour chocii 4 u verification code is: ${code}.\nValid for 15 minutes.\n\nchocii 4 u — A Little Treat, Just for You.`;
 
   // 1. Try Resend if configured
-  if (process.env.RESEND_API_KEY) {
+  const resendApiKey = process.env.RESEND_API_KEY?.trim();
+
+  if (resendApiKey) {
     try {
       const from = process.env.EMAIL_FROM || "chocii 4 u <onboarding@resend.dev>";
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          Authorization: `Bearer ${resendApiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -336,6 +338,7 @@ export async function sendOtpEmail({
 
       const data = await res.json().catch(() => null);
       if (res.ok && data?.id) {
+        console.log(`[Resend] Successfully dispatched OTP email to ${toEmail}. Message ID: ${data.id}`);
         return { success: true, provider: "resend", messageId: data.id };
       }
       console.warn("[Resend] Email dispatch response:", res.status, data);
