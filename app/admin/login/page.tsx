@@ -8,14 +8,24 @@ import { Lock, Phone, ShieldCheck, ArrowRight, RefreshCw, AlertCircle } from "lu
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [phone, setPhone] = useState("+919999999999");
-  const [password, setPassword] = useState("CravingsAdmin@2026");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!phone.trim()) {
+      setError("Please enter your admin mobile number or username.");
+      return;
+    }
+    if (!password) {
+      setError("Please enter your admin password.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -68,8 +78,8 @@ export default function AdminLoginPage() {
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-2xl bg-strawberry-500/15 border border-strawberry-500/40 text-strawberry-300 text-xs font-semibold flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -77,7 +87,7 @@ export default function AdminLoginPage() {
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-caramel-400">
-              Admin Phone Number
+              Admin Mobile Number or Username
             </label>
             <div className="relative">
               <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cream-300/40" />
@@ -86,7 +96,7 @@ export default function AdminLoginPage() {
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+919999999999"
+                placeholder="Enter mobile or username"
                 className="w-full bg-cocoa-950/80 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-xs text-cream-100 placeholder:text-cream-300/30 focus:outline-none focus:border-caramel-500"
               />
             </div>
@@ -127,12 +137,6 @@ export default function AdminLoginPage() {
             )}
           </button>
         </form>
-
-        <div className="p-3 bg-cocoa-950/60 rounded-xl border border-white/5 text-[11px] text-cream-300/70 space-y-1">
-          <p className="font-semibold text-caramel-400">Default Seed Credentials:</p>
-          <p>Phone: <span className="text-cream-100 font-mono">+919999999999</span></p>
-          <p>Password: <span className="text-cream-100 font-mono">CravingsAdmin@2026</span></p>
-        </div>
 
         <div className="pt-2 text-center">
           <Link

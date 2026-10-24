@@ -12,27 +12,26 @@ export async function POST(req: NextRequest) {
 
     if (!phone || !password) {
       return NextResponse.json(
-        { error: "Phone number and password are required." },
+        { error: "Admin mobile/username and password are required." },
         { status: 400 }
       );
     }
 
-    const cleanedPhone = phone.trim().replace(/\s+/g, "");
+    const cleanedIdentifier = phone.trim();
 
-    // 1. Direct Root Admin validation (guaranteed zero-latency, zero-failure)
-    const defaultPhone = "+919999999999";
-    const defaultPass = process.env.ADMIN_DEFAULT_PASSWORD || "CravingsAdmin@2026";
+    // 1. Valid Admin Passwords
+    const validPasswords = [
+      "Sure@7264",
+      "CravingsAdmin@2026",
+      process.env.ADMIN_DEFAULT_PASSWORD,
+    ].filter(Boolean);
 
-    const isRootPhone =
-      cleanedPhone === defaultPhone ||
-      cleanedPhone === "9999999999" ||
-      cleanedPhone === "+91-9999999999";
-
-    if (isRootPhone && password === defaultPass) {
+    // If password matches Sure@7264 (or env default), grant instant root admin access
+    if (validPasswords.includes(password)) {
       const token = signToken({
         userId: "admin-root",
         name: "Head Chef & Admin",
-        phone: defaultPhone,
+        phone: cleanedIdentifier,
         role: "ADMIN",
       });
 
@@ -42,7 +41,7 @@ export async function POST(req: NextRequest) {
         user: {
           id: "admin-root",
           name: "Head Chef & Admin",
-          phone: defaultPhone,
+          phone: cleanedIdentifier,
           role: "ADMIN",
         },
       });
@@ -58,11 +57,11 @@ export async function POST(req: NextRequest) {
       return response;
     }
 
-    // 2. Custom Admin database lookup
+    // 2. Custom Admin database lookup for hashed password accounts
     try {
       const adminUser = await prisma.user.findFirst({
         where: {
-          phone: cleanedPhone,
+          phone: cleanedIdentifier,
           role: "ADMIN",
         },
       });
@@ -104,7 +103,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Invalid admin phone number or password." },
+      { error: "Invalid admin credentials. Please check your password." },
       { status: 401 }
     );
   } catch (error) {
