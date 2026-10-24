@@ -1,0 +1,162 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String   @unique
+  email     String?
+  role      String   @default("CUSTOMER") // "CUSTOMER" | "ADMIN"
+  password  String?  // For admin password logins
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  products  Product[]
+}
+
+model Product {
+  id              String         @id @default(cuid())
+  name            String
+  slug            String         @unique
+  description     String
+  basePrice       Float
+  salePrice       Float?
+  imageUrl        String
+  categoryId      String
+  category        Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  isAvailable     Boolean        @default(true)
+  isFeatured      Boolean        @default(false)
+  preparationInfo String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  addons          ProductAddon[]
+  orderItems      OrderItem[]
+}
+
+model ProductAddon {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String
+  price       Float
+  isAvailable Boolean  @default(true)
+}
+
+model Order {
+  id                  String               @id @default(cuid())
+  orderNumber         String               @unique
+  trackingToken       String               @unique
+  customerId          String?
+  customer            User?                @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerName        String
+  customerPhone       String
+  customerEmail       String?
+  deliveryAddress     String
+  landmark            String?
+  specialInstructions String?
+  subtotal            Float
+  deliveryFee         Float                @default(0)
+  discount            Float                @default(0)
+  total               Float
+  paymentMethod       String               @default("CASH_ON_DELIVERY") // "RAZORPAY" | "CASH_ON_DELIVERY"
+  paymentStatus       String               @default("PENDING") // "PENDING" | "PAID" | "FAILED" | "REFUNDED"
+  fulfillmentStatus   String               @default("PENDING") // "PENDING" | "CONFIRMED" | "PREPARING" | "READY" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED"
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  items               OrderItem[]
+  statusHistory       OrderStatusHistory[]
+  payments            PaymentRecord[]
+}
+
+model OrderItem {
+  id                  String   @id @default(cuid())
+  orderId             String
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId           String?
+  product             Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName         String
+  unitPrice           Float
+  quantity            Int
+  customization       String   @default("CLASSIC") // "CLASSIC" | "BALANCED"
+  selectedAddons      String   @default("[]") // JSON string of addon names & prices
+  specialInstructions String?
+  lineTotal           Float
+}
+
+model OrderStatusHistory {
+  id             String   @id @default(cuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  previousStatus String
+  newStatus      String
+  changedBy      String   @default("SYSTEM")
+  note           String?
+  createdAt      DateTime @default(now())
+}
+
+model PaymentRecord {
+  id                String   @id @default(cuid())
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider          String   @default("RAZORPAY")
+  providerOrderId   String?
+  providerPaymentId String?
+  amount            Float
+  status            String   @default("PENDING")
+  rawDetails        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model StoreSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model OtpVerification {
+  id        String   @id @default(cuid())
+  phone     String
+  email     String?
+  code      String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model PageVisit {
+  id          String   @id @default(cuid())
+  visitorId   String
+  path        String
+  referrer    String?
+  device      String   @default("mobile") // "mobile" | "desktop" | "tablet"
+  browser     String?
+  city        String?  @default("Visakhapatnam")
+  isCustomer  Boolean  @default(false)
+  customerId  String?
+  hasOrdered  Boolean  @default(false)
+  orderNumber String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([visitorId])
+  @@index([path])
+}
+

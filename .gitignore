@@ -1,0 +1,42 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Environment Variables & Secrets
+.env
+.env*.local
+.env.production
+
+# Database
+/prisma/*.db
+/prisma/*.db-journal
+*.sqlite
+*.db
+*.db-journal
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS Files
+.DS_Store
+*.pem
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo

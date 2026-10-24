@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #FAF7F2;
+    --foreground: #24130F;
+    --card-bg: #FFFFFF;
+    --text-primary: #24130F;
+    --text-muted: #5C3A31;
+    --border-color: #EADCCE;
+  }
+
+  html, body {
+    background-color: #FAF7F2;
+    color: #24130F;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Custom Luxury Scrollbar - Cream & Cocoa */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #FAF7F2;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #D9C3AD;
+    border-radius: 4px;
+    border: 1px solid rgba(197, 138, 85, 0.3);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #C58A55;
+  }
+}
+
+/* ====================================================
+   WHITE LUXURY ATELIER THEME RULES
+   Guarantees pristine white surfaces, warm cream accents,
+   and deep cocoa typography across all routes
+==================================================== */
+body {
+  background-color: #FAF7F2 !important;
+  color: #24130F !important;
+}
+
+.bg-cocoa-950 {
+  background-color: #FAF7F2 !important;
+  color: #24130F !important;
+}
+
+.bg-cocoa-900,
+.bg-cocoa-900\/90,
+.bg-cocoa-900\/80,
+.bg-cocoa-900\/60,
+.bg-cocoa-900\/50,
+.bg-cocoa-900\/40,
+.bg-cocoa-900\/30 {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 4px 20px -2px rgba(36, 19, 15, 0.05);
+}
+
+.bg-gradient-to-b.from-cocoa-950,
+.bg-gradient-to-t.from-cocoa-950,
+.bg-gradient-to-r.from-cocoa-900 {
+  background: linear-gradient(to bottom, #FFFFFF, #FAF7F2, #FFFFFF) !important;
+}
+
+header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid rgba(78, 46, 38, 0.1) !important;
+  box-shadow: 0 2px 12px rgba(36, 19, 15, 0.04) !important;
+}
+
+footer,
+.bg-\[\#0a0504\],
+.bg-\[\#0c0605\] {
+  background-color: #F5EFEB !important;
+  border-top: 1px solid rgba(78, 46, 38, 0.12) !important;
+  color: #24130F !important;
+}
+
+/* Headings & Text */
+.text-cream-100,
+.text-cream-50,
+.text-white {
+  color: #24130F !important;
+}
+
+.text-cream-200,
+.text-cream-200\/90,
+.text-cream-200\/80,
+.text-cream-200\/70,
+.text-cream-300,
+.text-cream-300\/70,
+.text-cream-300\/60,
+.text-cream-300\/50,
+.text-cream-300\/40 {
+  color: #5C3A31 !important;
+}
+
+/* Borders */
+.border-white\/10,
+.border-white\/5,
+.border-white\/20,
+.divide-white\/5,
+.divide-white\/10 {
+  border-color: rgba(78, 46, 38, 0.12) !important;
+}
+
+.border-caramel-500\/20,
+.border-caramel-500\/30,
+.border-caramel-500\/10 {
+  border-color: rgba(197, 138, 85, 0.35) !important;
+}
+
+/* Form Inputs & iOS Safari Auto-Zoom Fix */
+input,
+textarea,
+select {
+  background-color: #FFFFFF !important;
+  color: #24130F !important;
+  border-color: rgba(78, 46, 38, 0.2) !important;
+}
+
+@media screen and (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents iOS Safari from zooming into the viewport */
+  }
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #C58A55 !important;
+  outline: none;
+}
+
+/* Mobile Touch & Safe Area Utilities */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation; /* Eliminates 300ms tap delay on mobile browsers */
+}
+
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+/* Buttons & Badges */
+.bg-white\/5,
+.bg-white\/10 {
+  background-color: rgba(36, 19, 15, 0.06) !important;
+  color: #24130F !important;
+}
+
+.bg-white\/15,
+.bg-white\/20 {
+  background-color: rgba(36, 19, 15, 0.1) !important;
+  color: #24130F !important;
+}
+
+/* Slider Controls & Progress */
+.bg-cocoa-900\/80 {
+  background-color: #FFFFFF !important;
+  border-color: rgba(78, 46, 38, 0.15) !important;
+  color: #24130F !important;
+}
+
+.text-white\/40,
+.text-white\/20 {
+  color: rgba(36, 19, 15, 0.35) !important;
+}
+
+/* Primary CTA Buttons remain solid deep cocoa for luxurious contrast */
+.bg-cocoa-950.text-white,
+button.bg-cocoa-950,
+a.bg-cocoa-950 {
+  background-color: #24130F !important;
+  color: #FFFFFF !important;
+}
+
+.bg-cocoa-950.text-white:hover,
+button.bg-cocoa-950:hover,
+a.bg-cocoa-950:hover {
+  background-color: #C58A55 !important;
+  color: #24130F !important;
+}
