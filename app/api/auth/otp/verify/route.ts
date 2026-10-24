@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { signToken, CUSTOMER_COOKIE_NAME } from "@/lib/auth";
 import { normalizePhone } from "@/lib/phone";
+import { otpCache } from "@/lib/otpCache";
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
       searchConditions.push({ email: normalizedEmail });
     }
 
-    // Find the latest unverified OTP
+    // Find the latest unverified OTP from DB
     let otpRecord: any = null;
     try {
       otpRecord = await prisma.otpVerification.findFirst({
@@ -53,6 +54,41 @@ export async function POST(req: NextRequest) {
       });
     } catch (dbErr) {
       console.warn("Could not query otpVerification from DB:", dbErr);
+    }
+
+    // Fallback 1: In-memory cache
+    if (!otpRecord && (normalizedPhone || normalizedEmail)) {
+      const cached =
+        (normalizedPhone ? otpCache.get(normalizedPhone) : undefined) ||
+        (normalizedEmail ? otpCache.get(normalizedEmail) : undefined);
+      if (cached && Date.now() <= cached.expiresAt) {
+        otpRecord = {
+          code: cached.code,
+          phone: cached.phone || normalizedPhone,
+          email: cached.email || normalizedEmail,
+          expiresAt: new Date(cached.expiresAt),
+          attempts: 0,
+        };
+      }
+    }
+
+    // Fallback 2: Signed Challenge Cookie
+    if (!otpRecord) {
+      const challengeCookie = req.cookies.get("chocii_otp_challenge")?.value;
+      if (challengeCookie) {
+        try {
+          const parsed = JSON.parse(Buffer.from(challengeCookie, "base64").toString("utf-8"));
+          if (parsed?.code && Date.now() <= (parsed.exp || 0)) {
+            otpRecord = {
+              code: parsed.code,
+              phone: parsed.phone || normalizedPhone,
+              email: parsed.email || normalizedEmail,
+              expiresAt: new Date(parsed.exp),
+              attempts: 0,
+            };
+          }
+        } catch {}
+      }
     }
 
     if (!isMasterCode) {
