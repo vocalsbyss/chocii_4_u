@@ -41,11 +41,13 @@ export async function GET(req: NextRequest) {
       categories,
     });
   } catch (error) {
-    console.error("Error fetching products:", error);
-    return NextResponse.json(
-      { error: "Failed to load products" },
-      { status: 500 }
-    );
+    console.error("Error fetching products, returning fallback catalog:", error);
+    const { getFallbackProducts, getFallbackCategories } = await import("@/lib/data/fallbackData");
+    return NextResponse.json({
+      success: true,
+      products: getFallbackProducts(),
+      categories: getFallbackCategories(),
+    });
   }
 }
 

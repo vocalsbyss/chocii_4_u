@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ClientCollectionPage from "./ClientCollectionPage";
 import { Product, Category } from "@/types";
+import { getFallbackCategories, getFallbackCategoryBySlug } from "@/lib/data/fallbackData";
 
 export const dynamic = "force-dynamic";
 
@@ -14,9 +15,19 @@ export async function generateMetadata({
   params,
 }: CollectionPageProps): Promise<Metadata> {
   const { slug } = params;
-  const category = await prisma.category.findUnique({
-    where: { slug },
-  });
+  let category: any = null;
+
+  try {
+    category = await prisma.category.findUnique({
+      where: { slug },
+    });
+  } catch (e) {
+    console.warn("Collection metadata DB error, using fallback:", e);
+  }
+
+  if (!category) {
+    category = getFallbackCategoryBySlug(slug);
+  }
 
   if (!category) {
     return {
@@ -40,38 +51,51 @@ export async function generateMetadata({
 
 export default async function CollectionPage({ params }: CollectionPageProps) {
   const { slug } = params;
+  let category: any = null;
+  let allCategories: Category[] = [];
 
-  const category = await prisma.category.findUnique({
-    where: { slug },
-    include: {
-      products: {
-        where: { isAvailable: true },
-        include: {
-          category: true,
-          addons: { where: { isAvailable: true } },
+  try {
+    category = await prisma.category.findUnique({
+      where: { slug },
+      include: {
+        products: {
+          where: { isAvailable: true },
+          include: {
+            category: true,
+            addons: { where: { isAvailable: true } },
+          },
+          orderBy: { isFeatured: "desc" },
         },
-        orderBy: { isFeatured: "desc" },
       },
-    },
-  });
+    });
+
+    const rawAll = await prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+    });
+    if (rawAll && rawAll.length > 0) {
+      allCategories = rawAll.map((c) => ({ ...c }));
+    }
+  } catch (error) {
+    console.warn("CollectionPage: DB query failed, using fallback:", error);
+  }
+
+  if (!category) {
+    category = getFallbackCategoryBySlug(slug);
+  }
 
   if (!category) {
     notFound();
   }
 
-  const allCategories = await prisma.category.findMany({
-    where: { isActive: true },
-    orderBy: { sortOrder: "asc" },
-  });
+  if (allCategories.length === 0) {
+    allCategories = getFallbackCategories();
+  }
 
-  const products: Product[] = category.products.map((p) => ({
+  const products: Product[] = (category.products || []).map((p: any) => ({
     ...p,
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-  }));
-
-  const categories: Category[] = allCategories.map((c) => ({
-    ...c,
+    createdAt: p.createdAt instanceof Date ? p.createdAt.toISOString() : p.createdAt,
+    updatedAt: p.updatedAt instanceof Date ? p.updatedAt.toISOString() : p.updatedAt,
   }));
 
   // JSON-LD structured data for Collection
@@ -101,7 +125,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       <ClientCollectionPage
         category={category}
         products={products}
-        allCategories={categories}
+        allCategories={allCategories}
       />
     </>
   );

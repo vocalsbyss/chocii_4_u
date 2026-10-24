@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import prisma from "@/lib/prisma";
+import { getFallbackProducts, getFallbackCategories } from "@/lib/data/fallbackData";
 
 export const dynamic = "force-dynamic";
 
@@ -64,7 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // 2. Dynamic Product Pages from Database
+  // 2. Dynamic Product Pages
   let productRoutes: MetadataRoute.Sitemap = [];
   try {
     const products = await prisma.product.findMany({
@@ -72,14 +73,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { slug: true, updatedAt: true },
     });
 
-    productRoutes = products.map((product) => ({
+    if (products && products.length > 0) {
+      productRoutes = products.map((product) => ({
+        url: `${baseUrl}/menu/${product.slug}`,
+        lastModified: product.updatedAt,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      }));
+    }
+  } catch (error) {
+    console.warn("Product sitemap DB error, using fallback catalog:", error);
+  }
+
+  if (productRoutes.length === 0) {
+    productRoutes = getFallbackProducts().map((product) => ({
       url: `${baseUrl}/menu/${product.slug}`,
-      lastModified: product.updatedAt,
+      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     }));
-  } catch (error) {
-    console.error("Error generating product sitemap:", error);
   }
 
   // 3. Dynamic Category Collection Pages
@@ -90,14 +102,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { slug: true },
     });
 
-    collectionRoutes = categories.map((cat) => ({
+    if (categories && categories.length > 0) {
+      collectionRoutes = categories.map((cat) => ({
+        url: `${baseUrl}/collections/${cat.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }));
+    }
+  } catch (error) {
+    console.warn("Category sitemap DB error, using fallback catalog:", error);
+  }
+
+  if (collectionRoutes.length === 0) {
+    collectionRoutes = getFallbackCategories().map((cat) => ({
       url: `${baseUrl}/collections/${cat.slug}`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
     }));
-  } catch (error) {
-    console.error("Error generating category sitemap:", error);
   }
 
   return [...staticRoutes, ...productRoutes, ...collectionRoutes];

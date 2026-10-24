@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import ClientMenuPage from "./ClientMenuPage";
 import { Product, Category } from "@/types";
+import { getFallbackProducts, getFallbackCategories } from "@/lib/data/fallbackData";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -20,30 +21,47 @@ export const metadata: Metadata = {
 };
 
 export default async function MenuPage() {
-  const [rawProducts, rawCategories] = await Promise.all([
-    prisma.product.findMany({
-      where: { isAvailable: true },
-      include: {
-        category: true,
-        addons: { where: { isAvailable: true } },
-      },
-      orderBy: [{ isFeatured: "desc" }, { createdAt: "asc" }],
-    }),
-    prisma.category.findMany({
-      where: { isActive: true },
-      orderBy: { sortOrder: "asc" },
-    }),
-  ]);
+  let products: Product[] = [];
+  let categories: Category[] = [];
 
-  const products: Product[] = rawProducts.map((p) => ({
-    ...p,
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-  }));
+  try {
+    const [rawProducts, rawCategories] = await Promise.all([
+      prisma.product.findMany({
+        where: { isAvailable: true },
+        include: {
+          category: true,
+          addons: { where: { isAvailable: true } },
+        },
+        orderBy: [{ isFeatured: "desc" }, { createdAt: "asc" }],
+      }),
+      prisma.category.findMany({
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+      }),
+    ]);
 
-  const categories: Category[] = rawCategories.map((c) => ({
-    ...c,
-  }));
+    if (rawProducts && rawProducts.length > 0) {
+      products = rawProducts.map((p) => ({
+        ...p,
+        createdAt: p.createdAt.toISOString(),
+        updatedAt: p.updatedAt.toISOString(),
+      }));
+    }
+
+    if (rawCategories && rawCategories.length > 0) {
+      categories = rawCategories.map((c) => ({ ...c }));
+    }
+  } catch (error) {
+    console.warn("MenuPage: Database query failed, serving fallback menu:", error);
+  }
+
+  // Graceful fallback if database returned empty or errored
+  if (products.length === 0) {
+    products = getFallbackProducts();
+  }
+  if (categories.length === 0) {
+    categories = getFallbackCategories();
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",

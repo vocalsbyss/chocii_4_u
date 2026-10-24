@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ClientProductDetailPage from "./ClientProductDetailPage";
 import { Product } from "@/types";
+import { getFallbackProductBySlug } from "@/lib/data/fallbackData";
 
 export const dynamic = "force-dynamic";
 
@@ -14,10 +15,20 @@ export async function generateMetadata({
   params,
 }: ProductDetailPageProps): Promise<Metadata> {
   const { slug } = params;
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: { category: true },
-  });
+  let product: any = null;
+
+  try {
+    product = await prisma.product.findUnique({
+      where: { slug },
+      include: { category: true },
+    });
+  } catch (err) {
+    console.warn("Product metadata: DB fetch error, using fallback:", err);
+  }
+
+  if (!product) {
+    product = getFallbackProductBySlug(slug);
+  }
 
   if (!product) {
     return {
@@ -46,24 +57,35 @@ export default async function ProductDetailPage({
   params,
 }: ProductDetailPageProps) {
   const { slug } = params;
+  let rawProduct: any = null;
 
-  const rawProduct = await prisma.product.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      addons: { where: { isAvailable: true } },
-    },
-  });
-
-  if (!rawProduct) {
-    notFound();
+  try {
+    rawProduct = await prisma.product.findUnique({
+      where: { slug },
+      include: {
+        category: true,
+        addons: { where: { isAvailable: true } },
+      },
+    });
+  } catch (error) {
+    console.warn("ProductDetailPage: Database query failed, checking fallback:", error);
   }
 
-  const product: Product = {
-    ...rawProduct,
-    createdAt: rawProduct.createdAt.toISOString(),
-    updatedAt: rawProduct.updatedAt.toISOString(),
-  };
+  let product: Product | null = null;
+
+  if (rawProduct) {
+    product = {
+      ...rawProduct,
+      createdAt: rawProduct.createdAt instanceof Date ? rawProduct.createdAt.toISOString() : rawProduct.createdAt,
+      updatedAt: rawProduct.updatedAt instanceof Date ? rawProduct.updatedAt.toISOString() : rawProduct.updatedAt,
+    };
+  } else {
+    product = getFallbackProductBySlug(slug);
+  }
+
+  if (!product) {
+    notFound();
+  }
 
   const currentPrice =
     product.salePrice && product.salePrice > 0 ? product.salePrice : product.basePrice;
