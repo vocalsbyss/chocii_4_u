@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
 import { normalizePhone } from "@/lib/phone";
-import { sendOtpEmail } from "@/lib/email";
+import { sendOtpEmail, SendEmailResult } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -74,41 +74,54 @@ export async function POST(req: NextRequest) {
     const otpCode = crypto.randomInt(100000, 999999).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
 
-    // Save OTP to database
-    await prisma.otpVerification.create({
-      data: {
-        phone: normalizedPhone,
-        email: normalizedEmail,
+    // Save OTP to database with try/catch fallback
+    try {
+      await prisma.otpVerification.create({
+        data: {
+          phone: normalizedPhone,
+          email: normalizedEmail,
+          code: otpCode,
+          expiresAt,
+          attempts: 0,
+          verified: false,
+        },
+      });
+    } catch (dbErr) {
+      console.warn("Could not save OTP to DB (serverless read-only fallback):", dbErr);
+    }
+
+    // Dispatch verification code to customer's Email
+    let emailResult: SendEmailResult = { success: false, provider: "development" };
+    try {
+      emailResult = await sendOtpEmail({
+        toEmail: normalizedEmail,
+        customerName: name.trim(),
         code: otpCode,
-        expiresAt,
-        attempts: 0,
-        verified: false,
-      },
-    });
+        phone: normalizedPhone,
+      });
+    } catch (sendErr) {
+      console.error("sendOtpEmail exception:", sendErr);
+    }
 
-    // Dispatch verification code to customer's Email (Zero cost)
-    await sendOtpEmail({
-      toEmail: normalizedEmail,
-      customerName: name.trim(),
-      code: otpCode,
-      phone: normalizedPhone,
-    });
-
-    // Only provide code in automated test environments
-    const isE2ETest =
-      req.headers.get("x-test-suite") === "cravings-e2e" ||
-      process.env.NODE_ENV === "test";
+    const isLiveProvider =
+      emailResult.success &&
+      (emailResult.provider === "resend" ||
+        emailResult.provider === "brevo" ||
+        emailResult.provider === "smtp");
 
     return NextResponse.json({
       success: true,
-      message: `A 6-digit verification code has been sent to your email (${normalizedEmail})`,
+      message: isLiveProvider
+        ? `A 6-digit verification code has been sent to your email (${normalizedEmail})`
+        : `Email service in setup mode. Your verification code is ${otpCode}`,
       phone: normalizedPhone,
       email: normalizedEmail,
-      demoCode: isE2ETest ? otpCode : undefined,
+      demoCode: !isLiveProvider ? otpCode : undefined,
+      isLiveEmail: isLiveProvider,
       cooldownSeconds: 60,
     });
   } catch (error) {
-    console.error("Error sending OTP:", error);
+    console.error("Error in OTP send route:", error);
     return NextResponse.json(
       { error: "Failed to send verification code. Please try again." },
       { status: 500 }

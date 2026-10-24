@@ -199,7 +199,7 @@ async function sendViaSmtp(
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = parseInt(process.env.SMTP_PORT || "465", 10);
   const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const pass = (process.env.SMTP_PASS || "").replace(/\s+/g, "");
   const from = process.env.SMTP_FROM || `chocii 4 u <${user}>`;
 
   if (!user || !pass) return false;
@@ -211,9 +211,9 @@ async function sendViaSmtp(
       try {
         socket.destroy();
       } catch {}
-      console.warn("[SMTP] Socket timeout after 12s");
+      console.warn("[SMTP] Socket timeout after 5s");
       resolve(false);
-    }, 12000);
+    }, 5000);
 
     const onConnect = () => {
       let stage = 0;

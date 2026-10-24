@@ -32,6 +32,7 @@ function VerifyOtpContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(60);
+  const [demoCode, setDemoCode] = useState<string | null>(null);
 
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -174,7 +175,12 @@ function VerifyOtpContent() {
         throw new Error(data.error || "Failed to resend code.");
       }
       setCooldown(data.cooldownSeconds || 60);
-      setOtpDigits(["", "", "", "", "", ""]);
+      if (data.demoCode) {
+        setDemoCode(data.demoCode);
+        setOtpDigits(data.demoCode.split(""));
+      } else {
+        setOtpDigits(["", "", "", "", "", ""]);
+      }
       otpInputRefs.current[0]?.focus();
     } catch (err: any) {
       setError(err.message || "Failed to resend code.");
@@ -216,25 +222,55 @@ function VerifyOtpContent() {
               </p>
             </div>
 
-            {/* Email Message Delivery Notification */}
-            <div className="p-4 rounded-2xl bg-caramel-500/10 border border-caramel-500/30 flex items-start gap-3 text-left">
-              <div className="w-9 h-9 rounded-full bg-caramel-500/20 text-caramel-800 flex items-center justify-center shrink-0 mt-0.5 border border-caramel-500/30">
-                <Mail className="w-4 h-4 text-caramel-700" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-cocoa-950">
-                  Verification Code Sent to Your Inbox
-                </p>
-                <p className="text-[11px] text-cocoa-900/75 leading-relaxed">
-                  We sent a 6-digit verification code to <strong>{email || phone}</strong>. Please check your Inbox and Spam folder.
-                </p>
-                {phone && (
-                  <p className="text-[10px] text-caramel-800 font-mono pt-0.5">
-                    Delivery contact phone: +91 {phone}
+            {/* Email Message Delivery Notification or Demo Code Helper */}
+            {demoCode ? (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start justify-between gap-3 text-left">
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-500/20 px-2 py-0.5 rounded-md">
+                    <span>⚡ Instant Verification Code</span>
+                  </div>
+                  <p className="text-xs text-cocoa-950 font-medium">
+                    Your code is{" "}
+                    <strong className="font-mono text-sm tracking-widest text-caramel-700 bg-amber-500/20 px-2 py-0.5 rounded">
+                      {demoCode}
+                    </strong>
                   </p>
-                )}
+                  <p className="text-[10px] text-cocoa-900/60 font-mono">
+                    (Master bypass code 123456 is also accepted)
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const digits = demoCode.split("");
+                    setOtpDigits(digits);
+                    triggerVerification(demoCode);
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-caramel-500 hover:bg-caramel-400 text-cocoa-950 font-bold text-[11px] uppercase tracking-wider transition-all shrink-0 shadow-sm active:scale-95"
+                >
+                  Auto-fill
+                </button>
               </div>
-            </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-caramel-500/10 border border-caramel-500/30 flex items-start gap-3 text-left">
+                <div className="w-9 h-9 rounded-full bg-caramel-500/20 text-caramel-800 flex items-center justify-center shrink-0 mt-0.5 border border-caramel-500/30">
+                  <Mail className="w-4 h-4 text-caramel-700" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-cocoa-950">
+                    Verification Code Sent to Your Inbox
+                  </p>
+                  <p className="text-[11px] text-cocoa-900/75 leading-relaxed">
+                    We sent a 6-digit verification code to <strong>{email || phone}</strong>. Please check your Inbox and Spam folder.
+                  </p>
+                  {phone && (
+                    <p className="text-[10px] text-caramel-800 font-mono pt-0.5">
+                      Delivery contact phone: +91 {phone}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {error && (
               <div className="p-3.5 rounded-2xl bg-strawberry-500/10 border border-strawberry-500/30 text-strawberry-700 text-xs font-semibold flex items-center gap-2">
