@@ -11,6 +11,7 @@ function findBundledDb(): string | null {
   const candidatePaths = [
     path.resolve(process.cwd(), "prisma", "dev.db"),
     path.resolve(process.cwd(), ".next", "server", "prisma", "dev.db"),
+    path.resolve(process.cwd(), ".next", "standalone", "prisma", "dev.db"),
     path.resolve(__dirname, "prisma", "dev.db"),
     path.resolve(__dirname, "..", "prisma", "dev.db"),
     path.resolve(__dirname, "..", "..", "prisma", "dev.db"),
@@ -18,6 +19,7 @@ function findBundledDb(): string | null {
     path.resolve(__dirname, "..", "..", "..", "..", "prisma", "dev.db"),
     "/var/task/prisma/dev.db",
     "/var/task/.next/server/prisma/dev.db",
+    "/var/task/.next/standalone/prisma/dev.db",
   ];
 
   for (const p of candidatePaths) {
@@ -27,6 +29,26 @@ function findBundledDb(): string | null {
       }
     } catch {}
   }
+
+  // Deep directory search if standard paths didn't match
+  try {
+    const rootSearch = process.env.LAMBDA_TASK_ROOT || process.cwd();
+    const searchDirs = [rootSearch, path.join(rootSearch, "prisma"), path.join(rootSearch, ".next")];
+    for (const d of searchDirs) {
+      if (fs.existsSync(d)) {
+        const files = fs.readdirSync(d);
+        for (const f of files) {
+          if (f === "dev.db") {
+            const full = path.join(d, f);
+            if (fs.statSync(full).size > 0) {
+              return full;
+            }
+          }
+        }
+      }
+    }
+  } catch {}
+
   return null;
 }
 

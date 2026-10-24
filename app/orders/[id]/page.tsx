@@ -28,17 +28,22 @@ export default async function OrderDetailPage({
     redirect(`/signin?redirect=/orders/${id}`);
   }
 
-  const rawOrder = await prisma.order.findFirst({
-    where: {
-      OR: [{ id }, { orderNumber: id }],
-    },
-    include: {
-      items: true,
-      statusHistory: {
-        orderBy: { createdAt: "asc" },
+  let rawOrder: any = null;
+  try {
+    rawOrder = await prisma.order.findFirst({
+      where: {
+        OR: [{ id }, { orderNumber: id }],
       },
-    },
-  });
+      include: {
+        items: true,
+        statusHistory: {
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+  } catch (error) {
+    console.warn("OrderDetailPage database query failed:", error);
+  }
 
   if (!rawOrder) {
     notFound();
@@ -51,14 +56,14 @@ export default async function OrderDetailPage({
 
   const order = {
     ...rawOrder,
-    createdAt: rawOrder.createdAt.toISOString(),
-    updatedAt: rawOrder.updatedAt.toISOString(),
-    items: rawOrder.items.map((it) => ({
+    createdAt: rawOrder.createdAt instanceof Date ? rawOrder.createdAt.toISOString() : rawOrder.createdAt,
+    updatedAt: rawOrder.updatedAt instanceof Date ? rawOrder.updatedAt.toISOString() : rawOrder.updatedAt,
+    items: (rawOrder.items || []).map((it: any) => ({
       ...it,
     })),
-    statusHistory: rawOrder.statusHistory.map((sh) => ({
+    statusHistory: (rawOrder.statusHistory || []).map((sh: any) => ({
       ...sh,
-      createdAt: sh.createdAt.toISOString(),
+      createdAt: sh.createdAt instanceof Date ? sh.createdAt.toISOString() : sh.createdAt,
     })),
   };
 
