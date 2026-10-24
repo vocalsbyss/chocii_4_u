@@ -7,6 +7,29 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
+function findBundledDb(): string | null {
+  const candidatePaths = [
+    path.resolve(process.cwd(), "prisma", "dev.db"),
+    path.resolve(process.cwd(), ".next", "server", "prisma", "dev.db"),
+    path.resolve(__dirname, "prisma", "dev.db"),
+    path.resolve(__dirname, "..", "prisma", "dev.db"),
+    path.resolve(__dirname, "..", "..", "prisma", "dev.db"),
+    path.resolve(__dirname, "..", "..", "..", "prisma", "dev.db"),
+    path.resolve(__dirname, "..", "..", "..", "..", "prisma", "dev.db"),
+    "/var/task/prisma/dev.db",
+    "/var/task/.next/server/prisma/dev.db",
+  ];
+
+  for (const p of candidatePaths) {
+    try {
+      if (fs.existsSync(p) && fs.statSync(p).size > 0) {
+        return p;
+      }
+    } catch {}
+  }
+  return null;
+}
+
 function resolveDatabaseUrl(): string | undefined {
   const envUrl = process.env.DATABASE_URL;
 
@@ -21,29 +44,26 @@ function resolveDatabaseUrl(): string | undefined {
     process.env.VERCEL_ENV
   );
 
-  const bundledDbPath = path.resolve(process.cwd(), "prisma", "dev.db");
+  const foundBundled = findBundledDb();
 
   if (isVercel) {
-    // In Vercel serverless functions, the root filesystem is read-only.
-    // Copy the seeded SQLite database to /tmp so reading and writing both work without errors!
     const tmpDbPath = "/tmp/chocii_prod.db";
     try {
-      if (!fs.existsSync(tmpDbPath)) {
-        if (fs.existsSync(bundledDbPath)) {
-          fs.copyFileSync(bundledDbPath, tmpDbPath);
+      if (!fs.existsSync(tmpDbPath) || fs.statSync(tmpDbPath).size === 0) {
+        if (foundBundled) {
+          fs.copyFileSync(foundBundled, tmpDbPath);
         }
       }
       if (fs.existsSync(tmpDbPath)) {
         return `file:${tmpDbPath}`;
       }
     } catch (e) {
-      console.warn("Could not copy database to /tmp, falling back to bundled path:", e);
+      console.warn("Could not copy database to /tmp, falling back to found path:", e);
     }
   }
 
-  // Use absolute path for SQLite so Prisma locates dev.db regardless of process cwd
-  if (fs.existsSync(bundledDbPath)) {
-    return `file:${bundledDbPath}`;
+  if (foundBundled) {
+    return `file:${foundBundled}`;
   }
 
   return envUrl;

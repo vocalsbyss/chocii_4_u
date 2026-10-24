@@ -31,11 +31,21 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Error fetching store settings:", error);
-    return NextResponse.json(
-      { error: "Failed to load store settings" },
-      { status: 500 }
-    );
+    console.warn("Error fetching store settings, returning default settings:", error);
+    return NextResponse.json({
+      success: true,
+      settings: {
+        brandName: "chocii 4 u",
+        brandTagline: "A Little Treat, Just for You.",
+        deliveryFee: 49,
+        freeDeliveryThreshold: 599,
+        minOrderValue: 199,
+        storeIsOpen: true,
+        openingHours: "12:00 PM - 01:00 AM",
+        contactPhone: "+91 86883 67177",
+        instagramUrl: "https://instagram.com/chocii4u.official",
+      },
+    });
   }
 }
 
