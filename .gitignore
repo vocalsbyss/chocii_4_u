@@ -19,11 +19,10 @@
 .env.production
 
 # Database
-/prisma/*.db
 /prisma/*.db-journal
 *.sqlite
-*.db
 *.db-journal
+!prisma/dev.db
 
 # Debug logs
 npm-debug.log*
