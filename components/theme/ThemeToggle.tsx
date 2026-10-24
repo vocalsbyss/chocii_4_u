@@ -17,9 +17,8 @@ export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
   }, []);
 
   if (!mounted) {
-    // Avoid hydration mismatch by rendering placeholder with fixed dimensions
     return (
-      <div className={`w-9 h-9 rounded-full bg-white/5 border border-white/10 ${className}`} />
+      <div className={`w-9 h-9 rounded-full bg-stone-200/40 border border-stone-300/40 ${className}`} />
     );
   }
 
@@ -29,16 +28,16 @@ export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
     <button
       onClick={toggleTheme}
       type="button"
-      aria-label={isDark ? "Switch to warm cream light theme" : "Switch to dark chocolate theme"}
+      aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
       title={isDark ? "Switch to Light Theme" : "Switch to Dark Theme"}
-      className={`relative p-2 rounded-full transition-all duration-300 active:scale-90 flex items-center justify-center ${
+      className={`relative w-9 h-9 rounded-full transition-all duration-300 active:scale-90 flex items-center justify-center shadow-sm cursor-pointer ${
         isDark
-          ? "bg-white/5 hover:bg-white/15 text-caramel-400 border border-white/10 shadow-sm"
-          : "bg-cocoa-900/10 hover:bg-cocoa-900/20 text-cocoa-950 border border-cocoa-900/20 shadow-sm"
+          ? "bg-[#2A140F] hover:bg-[#361D17] text-amber-300 border border-caramel-500/40"
+          : "bg-stone-100 hover:bg-stone-200 text-cocoa-950 border border-stone-300"
       } ${className}`}
     >
       {isDark ? (
-        <Sun className="w-4 h-4 transition-transform duration-300 hover:rotate-45 text-caramel-400" />
+        <Sun className="w-4 h-4 transition-transform duration-300 hover:rotate-45 text-amber-300" />
       ) : (
         <Moon className="w-4 h-4 transition-transform duration-300 hover:-rotate-12 text-cocoa-900" />
       )}
