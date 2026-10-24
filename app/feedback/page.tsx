@@ -261,14 +261,14 @@ export default function FeedbackPage() {
             <div className="lg:col-span-7 space-y-6">
               <div className="flex items-center justify-between pb-2">
                 <div>
-                  <span className="text-xs uppercase tracking-widest text-caramel-600 font-bold">
+                  <span className="text-xs uppercase tracking-widest text-caramel-600 dark:text-caramel-400 font-bold">
                     Community Praise
                   </span>
-                  <h2 className="text-2xl sm:text-3xl font-serif font-black text-cocoa-950 mt-1">
+                  <h2 className="text-2xl sm:text-3xl font-serif font-black text-cocoa-950 dark:text-cream-100 mt-1">
                     Verified Customer Reviews
                   </h2>
                 </div>
-                <span className="text-xs font-mono font-bold bg-white px-3 py-1.5 rounded-full border border-stone-200 text-cocoa-950 shadow-sm">
+                <span className="text-xs font-mono font-bold bg-white dark:bg-cocoa-900 px-3 py-1.5 rounded-full border border-stone-200 dark:border-white/10 text-cocoa-950 dark:text-cream-200 shadow-sm">
                   {reviews.length} Reflections
                 </span>
               </div>
@@ -277,20 +277,20 @@ export default function FeedbackPage() {
                 {reviews.map((rev) => (
                   <div
                     key={rev.id}
-                    className="p-6 sm:p-7 rounded-3xl bg-white border border-stone-200 shadow-sm hover:shadow-md transition-shadow space-y-4"
+                    className="p-6 sm:p-7 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow space-y-4"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-bold text-cocoa-950">{rev.author}</h4>
+                          <h4 className="text-sm font-bold text-cocoa-950 dark:text-cream-100">{rev.author}</h4>
                           {rev.verified && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                               Verified Order
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-cocoa-800/60">{rev.city}</p>
+                        <p className="text-xs text-cocoa-800/60 dark:text-cream-300/70">{rev.city}</p>
                       </div>
 
                       <div className="flex flex-col items-end gap-1">
@@ -302,54 +302,54 @@ export default function FeedbackPage() {
                             />
                           ))}
                         </div>
-                        <span className="text-[10px] text-cocoa-950/40">{rev.date}</span>
+                        <span className="text-[10px] text-cocoa-950/40 dark:text-cream-300/40">{rev.date}</span>
                       </div>
                     </div>
 
-                    <p className="text-xs sm:text-sm text-cocoa-900 leading-relaxed font-normal">
-                      "{rev.comment}"
+                    <p className="text-xs sm:text-sm text-cocoa-900 dark:text-cream-100 leading-relaxed font-normal">
+                      &ldquo;{rev.comment}&rdquo;
                     </p>
 
-                    <div className="border-t border-stone-100 pt-3 flex items-center justify-between">
-                      <span className="text-[11px] font-mono text-caramel-700 font-bold uppercase">
+                    <div className="border-t border-stone-100 dark:border-white/10 pt-3 flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-caramel-700 dark:text-caramel-400 font-bold uppercase">
                         {rev.dessert}
                       </span>
-                      <span className="text-[10px] text-cocoa-950/40">Visakhapatnam Kitchen Dispatch</span>
+                      <span className="text-[10px] text-cocoa-950/40 dark:text-cream-300/40">Visakhapatnam Kitchen Dispatch</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right: Submit Review Form on Bright White */}
+            {/* Right: Submit Review Form */}
             <div className="lg:col-span-5 sticky top-28">
-              <div className="p-8 rounded-3xl bg-white border border-stone-200 shadow-lg space-y-6">
+              <div className="p-8 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 shadow-lg space-y-6">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-caramel-500/10 text-caramel-700 text-[10px] font-bold uppercase tracking-wider">
-                    <MessageSquare className="w-3 h-3 text-caramel-600" />
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-caramel-500/10 text-caramel-700 dark:text-caramel-400 text-[10px] font-bold uppercase tracking-wider">
+                    <MessageSquare className="w-3 h-3 text-caramel-600 dark:text-caramel-400" />
                     Share Your Craving
                   </div>
-                  <h3 className="text-2xl font-serif font-black text-cocoa-950 mt-2">
+                  <h3 className="text-2xl font-serif font-black text-cocoa-950 dark:text-cream-100 mt-2">
                     Submit Your Crave Review
                   </h3>
-                  <p className="text-xs text-cocoa-900/70 mt-1">
+                  <p className="text-xs text-cocoa-900/70 dark:text-cream-300/70 mt-1">
                     Your taste notes help us craft even more unforgettable chocolate moments.
                   </p>
                 </div>
 
                 {submitted ? (
-                  <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                    <h4 className="text-sm font-bold text-emerald-950">
+                  <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-center space-y-3">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400 mx-auto" />
+                    <h4 className="text-sm font-bold text-emerald-950 dark:text-emerald-200">
                       Thank You for Your Feedback!
                     </h4>
-                    <p className="text-xs text-emerald-800">
+                    <p className="text-xs text-emerald-800 dark:text-emerald-300">
                       Your review has been verified and added to the community wall.
                     </p>
                     <button
                       type="button"
                       onClick={() => setSubmitted(false)}
-                      className="text-xs font-bold uppercase tracking-wider text-emerald-800 underline underline-offset-4 pt-1"
+                      className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 underline underline-offset-4 pt-1"
                     >
                       Write Another Review
                     </button>
@@ -357,7 +357,7 @@ export default function FeedbackPage() {
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950">
+                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950 dark:text-cream-200">
                         Your Full Name
                       </label>
                       <input
@@ -366,12 +366,12 @@ export default function FeedbackPage() {
                         placeholder="e.g. Diya Sengupta"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-xs text-cocoa-950 placeholder:text-cocoa-950/40 focus:outline-none focus:border-caramel-500 shadow-sm transition-colors"
+                        className="w-full bg-white dark:bg-cocoa-950 border border-stone-300 dark:border-white/10 rounded-xl px-4 py-3 text-xs text-cocoa-950 dark:text-cream-100 placeholder:text-cocoa-950/40 dark:placeholder:text-cream-300/40 focus:outline-none focus:border-caramel-500 shadow-sm transition-colors"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950">
+                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950 dark:text-cream-200">
                         City / Locality
                       </label>
                       <input
@@ -379,18 +379,18 @@ export default function FeedbackPage() {
                         placeholder="e.g. Muralinagar, Visakhapatnam"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        className="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-xs text-cocoa-950 placeholder:text-cocoa-950/40 focus:outline-none focus:border-caramel-500 shadow-sm transition-colors"
+                        className="w-full bg-white dark:bg-cocoa-950 border border-stone-300 dark:border-white/10 rounded-xl px-4 py-3 text-xs text-cocoa-950 dark:text-cream-100 placeholder:text-cocoa-950/40 dark:placeholder:text-cream-300/40 focus:outline-none focus:border-caramel-500 shadow-sm transition-colors"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950">
+                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950 dark:text-cream-200">
                         Which Dessert Did You Enjoy?
                       </label>
                       <select
                         value={dessert}
                         onChange={(e) => setDessert(e.target.value)}
-                        className="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-xs text-cocoa-950 focus:outline-none focus:border-caramel-500 shadow-sm transition-colors"
+                        className="w-full bg-white dark:bg-cocoa-950 border border-stone-300 dark:border-white/10 rounded-xl px-4 py-3 text-xs text-cocoa-950 dark:text-cream-100 focus:outline-none focus:border-caramel-500 shadow-sm transition-colors"
                       >
                         <option value="3D Dream Cake">3D Dream Cake</option>
                         <option value="Brownie Bowl">Brownie Bowl</option>
@@ -402,7 +402,7 @@ export default function FeedbackPage() {
 
                     {/* Star Rating Selector */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950">
+                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950 dark:text-cream-200">
                         Your Crave Rating
                       </label>
                       <div className="flex items-center gap-2 pt-1">
@@ -417,19 +417,19 @@ export default function FeedbackPage() {
                               className={`w-6 h-6 ${
                                 star <= rating
                                   ? "fill-caramel-500 text-caramel-500"
-                                  : "text-stone-300 fill-transparent"
+                                  : "text-stone-300 dark:text-stone-700 fill-transparent"
                               }`}
                             />
                           </button>
                         ))}
-                        <span className="text-xs font-bold text-cocoa-950 ml-2 font-mono">
+                        <span className="text-xs font-bold text-cocoa-950 dark:text-cream-200 ml-2 font-mono">
                           {rating} / 5 Stars
                         </span>
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950">
+                      <label className="text-xs font-bold uppercase tracking-wider text-cocoa-950 dark:text-cream-200">
                         Review & Sensory Notes
                       </label>
                       <textarea
@@ -438,15 +438,15 @@ export default function FeedbackPage() {
                         placeholder="Tell us about the texture, sweetness balance, chocolate aroma, or delivery packaging..."
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
-                        className="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-xs text-cocoa-950 placeholder:text-cocoa-950/40 focus:outline-none focus:border-caramel-500 shadow-sm transition-colors"
+                        className="w-full bg-white dark:bg-cocoa-950 border border-stone-300 dark:border-white/10 rounded-xl px-4 py-3 text-xs text-cocoa-950 dark:text-cream-100 placeholder:text-cocoa-950/40 dark:placeholder:text-cream-300/40 focus:outline-none focus:border-caramel-500 shadow-sm transition-colors"
                       />
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full py-4 rounded-2xl bg-cocoa-950 hover:bg-caramel-500 text-white hover:text-cocoa-950 font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-xl shadow-cocoa-950/15 transition-all active:scale-98"
+                      className="w-full py-4 rounded-2xl bg-cocoa-950 hover:bg-caramel-500 dark:bg-caramel-500 dark:hover:bg-caramel-400 text-white dark:text-cocoa-950 font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-xl shadow-cocoa-950/15 transition-all active:scale-98"
                     >
-                      <Send className="w-4 h-4 text-caramel-400" />
+                      <Send className="w-4 h-4 text-caramel-400 dark:text-cocoa-950" />
                       Post Verified Review
                     </button>
                   </form>

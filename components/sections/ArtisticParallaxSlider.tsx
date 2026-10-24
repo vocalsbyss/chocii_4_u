@@ -382,13 +382,13 @@ export default function ArtisticParallaxSlider({
           <div className="text-center space-y-4 max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 max-w-full">
               <span className="w-2.5 h-2.5 rounded-full bg-caramel-500 animate-ping shrink-0" />
-              <span className="text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-[0.25em] text-caramel-700 font-black bg-white px-3 sm:px-3.5 py-1.5 rounded-full border border-stone-200 shadow-sm font-mono max-w-[88vw] truncate">
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-[0.25em] text-caramel-700 dark:text-caramel-400 font-black bg-white dark:bg-cocoa-900 px-3 sm:px-3.5 py-1.5 rounded-full border border-stone-200 dark:border-white/10 shadow-sm font-mono max-w-[88vw] truncate">
                 CHOCII 4 U • SENSORY FEEDBACK & REVIEWS
               </span>
             </div>
-            <h2 className="text-2xl sm:text-5xl lg:text-6xl font-black font-sans uppercase tracking-tight text-cocoa-950 leading-[0.95] break-words">
+            <h2 className="text-2xl sm:text-5xl lg:text-6xl font-black font-sans uppercase tracking-tight text-cocoa-950 dark:text-cream-100 leading-[0.95] break-words">
               <span className="block">SENSORY REVIEWS &</span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cocoa-950 via-caramel-600 to-caramel-500 italic font-serif lowercase">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cocoa-950 via-caramel-600 to-caramel-500 dark:from-cream-100 dark:via-caramel-400 dark:to-caramel-300 italic font-serif lowercase">
                 customer love
               </span>
             </h2>
@@ -398,11 +398,11 @@ export default function ArtisticParallaxSlider({
                   <Star key={i} className="w-4 h-4 fill-caramel-500 text-caramel-500" />
                 ))}
               </div>
-              <span className="text-xs font-mono font-bold text-cocoa-950 ml-1 sm:ml-2">
+              <span className="text-xs font-mono font-bold text-cocoa-950 dark:text-cream-200 ml-1 sm:ml-2">
                 4.9 / 5.0 Rating • 2,400+ Verified Orders
               </span>
             </div>
-            <p className="text-sm text-cocoa-900/80 font-normal leading-relaxed">
+            <p className="text-sm text-cocoa-900/80 dark:text-cream-200/80 font-normal leading-relaxed">
               Real reviews from dessert enthusiasts across Visakhapatnam. Tell us how your sweet craving was satisfied!
             </p>
           </div>
@@ -412,7 +412,7 @@ export default function ArtisticParallaxSlider({
             {TESTIMONIALS.map((t, idx) => (
               <div
                 key={idx}
-                className="p-7 rounded-3xl bg-white border border-stone-200 space-y-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
+                className="p-7 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 space-y-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="space-y-3">
                   <div className="flex gap-1 text-caramel-500">
@@ -420,16 +420,16 @@ export default function ArtisticParallaxSlider({
                       <Star key={i} className="w-3.5 h-3.5 fill-caramel-500 text-caramel-500" />
                     ))}
                   </div>
-                  <p className="text-xs sm:text-sm text-cocoa-900/90 italic font-normal leading-relaxed">
+                  <p className="text-xs sm:text-sm text-cocoa-900/90 dark:text-cream-100 italic font-normal leading-relaxed">
                     &ldquo;{t.quote}&rdquo;
                   </p>
                 </div>
-                <div className="border-t border-stone-200/60 pt-3 flex items-center justify-between">
+                <div className="border-t border-stone-200/60 dark:border-white/10 pt-3 flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-bold text-cocoa-950">{t.author}</p>
-                    <p className="text-[11px] text-cocoa-800/60">{t.city}</p>
+                    <p className="text-xs font-bold text-cocoa-950 dark:text-cream-100">{t.author}</p>
+                    <p className="text-[11px] text-cocoa-800/60 dark:text-cream-300/70">{t.city}</p>
                   </div>
-                  <span className="text-[10px] font-mono text-caramel-700 font-bold uppercase bg-stone-100 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-mono text-caramel-700 dark:text-caramel-400 font-bold uppercase bg-stone-100 dark:bg-white/10 px-2 py-0.5 rounded">
                     {t.dessert}
                   </span>
                 </div>
@@ -438,24 +438,24 @@ export default function ArtisticParallaxSlider({
           </div>
 
           {/* Quick Review Submission Box */}
-          <div className="max-w-2xl mx-auto rounded-3xl bg-white border border-stone-200 p-6 sm:p-8 shadow-sm">
-            <h3 className="text-lg font-serif font-black text-cocoa-950 mb-1">
+          <div className="max-w-2xl mx-auto rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 p-6 sm:p-8 shadow-sm">
+            <h3 className="text-lg font-serif font-black text-cocoa-950 dark:text-cream-100 mb-1">
               Share Your Craving Experience
             </h3>
-            <p className="text-xs text-cocoa-900/70 mb-5">
+            <p className="text-xs text-cocoa-900/70 dark:text-cream-300/70 mb-5">
               Let us know how you enjoyed your treat. Your review helps us craft even sweeter moments!
             </p>
 
             {reviewSubmitted ? (
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Thank you! Your sweet feedback has been received with love.</span>
               </div>
             ) : (
               <form onSubmit={handleReviewSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-cocoa-900 mb-1">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-cocoa-900 dark:text-cream-200 mb-1">
                       Your Name
                     </label>
                     <input
@@ -464,17 +464,17 @@ export default function ArtisticParallaxSlider({
                       placeholder="e.g. Rahul Sharma"
                       value={reviewName}
                       onChange={(e) => setReviewName(e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-cocoa-950 placeholder:text-stone-400 focus:outline-none focus:border-caramel-500"
+                      className="w-full bg-stone-50 dark:bg-cocoa-950 border border-stone-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-cocoa-950 dark:text-cream-100 placeholder:text-stone-400 dark:placeholder:text-cream-300/40 focus:outline-none focus:border-caramel-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-cocoa-900 mb-1">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-cocoa-900 dark:text-cream-200 mb-1">
                       Dessert Enjoyed
                     </label>
                     <select
                       value={reviewDessert}
                       onChange={(e) => setReviewDessert(e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-cocoa-950 focus:outline-none focus:border-caramel-500"
+                      className="w-full bg-stone-50 dark:bg-cocoa-950 border border-stone-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-cocoa-950 dark:text-cream-100 focus:outline-none focus:border-caramel-500"
                     >
                       <option value="Dream Cake">Dream Cake</option>
                       <option value="Dream Bowl">Dream Bowl</option>
@@ -486,7 +486,7 @@ export default function ArtisticParallaxSlider({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cocoa-900 mb-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cocoa-900 dark:text-cream-200 mb-1">
                     Rating
                   </label>
                   <div className="flex gap-2">
@@ -499,7 +499,7 @@ export default function ArtisticParallaxSlider({
                       >
                         <Star
                           className={`w-5 h-5 ${
-                            star <= reviewRating ? "fill-caramel-500" : "text-stone-300"
+                            star <= reviewRating ? "fill-caramel-500" : "text-stone-300 dark:text-stone-700"
                           }`}
                         />
                       </button>
@@ -508,7 +508,7 @@ export default function ArtisticParallaxSlider({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cocoa-900 mb-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cocoa-900 dark:text-cream-200 mb-1">
                     Your Review
                   </label>
                   <textarea
@@ -517,20 +517,20 @@ export default function ArtisticParallaxSlider({
                     placeholder="Tell us about the texture, flavour, and delivery experience..."
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-cocoa-950 placeholder:text-stone-400 focus:outline-none focus:border-caramel-500"
+                    className="w-full bg-stone-50 dark:bg-cocoa-950 border border-stone-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-cocoa-950 dark:text-cream-100 placeholder:text-stone-400 dark:placeholder:text-cream-300/40 focus:outline-none focus:border-caramel-500"
                   />
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
                   <Link
                     href="/feedback"
-                    className="text-[11px] text-caramel-700 hover:underline font-bold uppercase tracking-wider"
+                    className="text-[11px] text-caramel-700 dark:text-caramel-400 hover:underline font-bold uppercase tracking-wider"
                   >
                     View All Customer Reviews →
                   </Link>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-full bg-cocoa-950 hover:bg-caramel-500 text-white hover:text-cocoa-950 text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-2"
+                    className="px-6 py-2.5 rounded-full bg-cocoa-950 hover:bg-caramel-500 dark:bg-caramel-500 dark:hover:bg-caramel-400 text-white dark:text-cocoa-950 text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-2"
                   >
                     <span>Submit Review</span>
                     <Send className="w-3.5 h-3.5" />

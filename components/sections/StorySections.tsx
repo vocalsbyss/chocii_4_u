@@ -472,48 +472,48 @@ export default function StorySections({
       </section>
 
       {/* SECTION 7: CUSTOMER REVIEWS & PRAISE */}
-      <section className="py-24 bg-white border-t border-b border-stone-200">
+      <section className="py-24 bg-white dark:bg-cocoa-950 border-t border-b border-stone-200 dark:border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3 max-w-2xl mx-auto">
-            <span className="text-xs uppercase tracking-[0.25em] text-caramel-600 font-bold">
+            <span className="text-xs uppercase tracking-[0.25em] text-caramel-600 dark:text-caramel-400 font-bold">
               Loved By 1,200+ Dessert Enthusiasts
             </span>
-            <h2 className="text-3xl sm:text-4xl font-serif font-black text-cocoa-950">
+            <h2 className="text-3xl sm:text-4xl font-serif font-black text-cocoa-950 dark:text-cream-100">
               The Word On The Street
             </h2>
             <div className="flex items-center justify-center gap-1 text-caramel-500 pt-1">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-4 h-4 fill-caramel-500 text-caramel-500" />
               ))}
-              <span className="text-xs font-mono font-bold text-cocoa-950 ml-2">4.9 / 5.0 Rating</span>
+              <span className="text-xs font-mono font-bold text-cocoa-950 dark:text-cream-200 ml-2">4.9 / 5.0 Rating</span>
             </div>
           </div>
 
           {/* 3D Customer Loved Chocolate Atelier */}
-          <div className="rounded-3xl border border-stone-200 bg-white p-6 sm:p-8 shadow-sm overflow-hidden relative">
+          <div className="rounded-3xl border border-stone-200 dark:border-white/10 bg-white dark:bg-cocoa-900 p-6 sm:p-8 shadow-sm overflow-hidden relative">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-5 space-y-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-caramel-700 bg-white px-3 py-1 rounded-full border border-stone-200 shadow-sm">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-caramel-700 dark:text-caramel-400 bg-white dark:bg-cocoa-950 px-3 py-1 rounded-full border border-stone-200 dark:border-white/10 shadow-sm">
                   3D Sensory Atelier
                 </span>
-                <h3 className="text-2xl sm:text-3xl font-serif font-black text-cocoa-950 leading-tight">
+                <h3 className="text-2xl sm:text-3xl font-serif font-black text-cocoa-950 dark:text-cream-100 leading-tight">
                   Crafted to Crave. <br />
                   Celebrated by Thousands.
                 </h3>
-                <p className="text-xs sm:text-sm text-cocoa-900/80 leading-relaxed font-normal">
+                <p className="text-xs sm:text-sm text-cocoa-900/80 dark:text-cream-200/80 leading-relaxed font-normal">
                   Watch rich chocolate ribbons and crisp chocolate pieces swirl in real-time. Every dessert is designed to satisfy your cravings.
                 </p>
                 <div className="pt-2">
                   <Link
                     href="/feedback"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-cocoa-950 hover:bg-cocoa-900 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-cocoa-950/15"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-cocoa-950 hover:bg-cocoa-900 dark:bg-caramel-500 dark:hover:bg-caramel-400 text-white dark:text-cocoa-950 text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-cocoa-950/15"
                   >
                     View 3D Feedback Experience & Reviews
-                    <ArrowRight className="w-3.5 h-3.5 text-caramel-400" />
+                    <ArrowRight className="w-3.5 h-3.5 text-caramel-400 dark:text-cocoa-950" />
                   </Link>
                 </div>
               </div>
-              <div className="lg:col-span-7 h-[360px] sm:h-[440px] rounded-2xl overflow-hidden relative border-2 border-stone-200 bg-white shadow-xl">
+              <div className="lg:col-span-7 h-[360px] sm:h-[440px] rounded-2xl overflow-hidden relative border-2 border-stone-200 dark:border-white/10 bg-white dark:bg-cocoa-950 shadow-xl">
                 <FloatingChocolateCanvas
                   variant="feedback"
                   className="h-full w-full"
@@ -528,7 +528,7 @@ export default function StorySections({
             {TESTIMONIALS.map((t, idx) => (
               <div
                 key={idx}
-                className="p-8 rounded-3xl bg-white border border-stone-200 space-y-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
+                className="p-8 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 space-y-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="space-y-4">
                   <div className="flex gap-1 text-caramel-500">
@@ -536,16 +536,16 @@ export default function StorySections({
                       <Star key={i} className="w-3.5 h-3.5 fill-caramel-500 text-caramel-500" />
                     ))}
                   </div>
-                  <p className="text-xs sm:text-sm text-cocoa-900/90 italic font-normal leading-relaxed">
-                    "{t.quote}"
+                  <p className="text-xs sm:text-sm text-cocoa-900/90 dark:text-cream-100 italic font-normal leading-relaxed">
+                    &ldquo;{t.quote}&rdquo;
                   </p>
                 </div>
-                <div className="border-t border-stone-200/60 pt-4 flex items-center justify-between">
+                <div className="border-t border-stone-200/60 dark:border-white/10 pt-4 flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-bold text-cocoa-950">{t.author}</p>
-                    <p className="text-[11px] text-cocoa-800/60">{t.city}</p>
+                    <p className="text-xs font-bold text-cocoa-950 dark:text-cream-100">{t.author}</p>
+                    <p className="text-[11px] text-cocoa-800/60 dark:text-cream-300/70">{t.city}</p>
                   </div>
-                  <span className="text-[10px] font-mono text-caramel-600 font-bold uppercase">
+                  <span className="text-[10px] font-mono text-caramel-600 dark:text-caramel-400 font-bold uppercase">
                     {t.dessert}
                   </span>
                 </div>
@@ -556,7 +556,7 @@ export default function StorySections({
           <div className="text-center pt-2">
             <Link
               href="/feedback"
-              className="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-caramel-700 hover:text-caramel-800 underline underline-offset-8 transition-colors"
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-caramel-700 dark:text-caramel-400 hover:text-caramel-800 dark:hover:text-caramel-300 underline underline-offset-8 transition-colors"
             >
               Read All Verified Customer Reviews & Submit Your Own Feedback
               <ArrowRight className="w-3.5 h-3.5" />

@@ -164,26 +164,35 @@ html.dark header {
   color: #FFF5E9 !important;
 }
 
-/* Headings and Primary Typography */
+/* Headings and Primary Typography in Dark Mode */
 html.dark h1,
 html.dark h2,
 html.dark h3,
 html.dark h4,
-html.dark .text-cocoa-950,
-html.dark .text-cocoa-900,
-html.dark .text-cocoa-800 {
+html.dark h5,
+html.dark h6,
+html.dark [class*="text-cocoa-950"],
+html.dark [class*="text-cocoa-900"],
+html.dark [class*="text-cocoa-800"] {
   color: #FFF5E9 !important;
 }
 
-/* Secondary & Muted Typography */
-html.dark .text-cocoa-900\/80,
-html.dark .text-cocoa-900\/75,
-html.dark .text-cocoa-900\/70,
-html.dark .text-cocoa-900\/60,
-html.dark .text-cocoa-900\/50,
-html.dark .text-cocoa-800\/70,
-html.dark .text-stone-500 {
-  color: rgba(255, 245, 233, 0.72) !important;
+/* Secondary & Muted Typography in Dark Mode */
+html.dark [class*="text-cocoa-900\/"],
+html.dark [class*="text-cocoa-950\/"],
+html.dark [class*="text-cocoa-800\/"],
+html.dark [class*="text-stone-500"],
+html.dark [class*="text-stone-600"],
+html.dark [class*="text-stone-700"],
+html.dark [class*="text-stone-800"] {
+  color: rgba(255, 245, 233, 0.85) !important;
+}
+
+/* Explicit review text, quotes, testimonials, and author notes in Dark Mode */
+html.dark p.italic,
+html.dark blockquote,
+html.dark q {
+  color: #FFF5E9 !important;
 }
 
 /* Caramel and Golden Accents */
