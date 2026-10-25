@@ -29,21 +29,21 @@ import {
   Flame,
 } from "lucide-react";
 
-// Pre-configured festive & promotional presets
+// Pre-configured festive greeting & celebration wish presets (No forced coupons)
 const FESTIVE_PRESETS = [
   {
     id: "diwali",
-    name: "Diwali Dhamaka",
+    name: "Diwali Wishes",
     occasion: "DIWALI",
     emoji: "🪔",
-    title: "Happy Diwali! Spread Sweet Joy with chocii 4 u",
-    subject: "🪔 Warm Diwali Wishes & Flat 25% OFF from chocii 4 u",
+    title: "Happy Diwali! Warm Wishes from chocii 4 u",
+    subject: "🪔 Wishing You a Joyous & Sparkling Diwali!",
     message:
-      "Wishing you and your loved ones a sparkling, joyous, and luminous Diwali! May this festival of lights brighten your home with happiness and sweet moments.\n\nCelebrate with our gourmet handcrafted Dream Cakes, molten brownie bowls, and rich chocolate creations crafted fresh in Visakhapatnam.\n\n“A Little Treat, Just for You.”",
-    offerCode: "DIWALI25",
-    discountText: "FLAT 25% OFF ON ALL ORDERS",
-    validTill: "Valid throughout Diwali Festive Days",
-    ctaText: "Claim Diwali Treat",
+      "Wishing you and your family a radiant, joyous, and luminous Diwali! May this sacred festival of lights bring abundant peace, good health, and countless sweet moments into your home.\n\nWarmest festive wishes from the chocii 4 u artisanal kitchen team.\n\n“A Little Treat, Just for You.” ✨",
+    offerCode: "",
+    discountText: "",
+    validTill: "",
+    ctaText: "Visit chocii 4 u",
     ctaLink: "/#full-menu-section",
   },
   {
@@ -51,89 +51,89 @@ const FESTIVE_PRESETS = [
     name: "Eid Mubarak",
     occasion: "EID",
     emoji: "🌙",
-    title: "Eid Mubarak! Sweeten Your Celebrations",
-    subject: "🌙 Eid Mubarak from chocii 4 u! Exclusive Sweet Treat Inside",
+    title: "Eid Mubarak! Warm Blessings & Peace",
+    subject: "🌙 Eid Mubarak from chocii 4 u! Wishing You Joy & Peace",
     message:
-      "May the divine blessings of Eid bring peace, happiness, and prosperity to you and your cherished family.\n\nIndulge in our exquisite dessert selections, made with the finest cocoa and fresh artisanal ingredients.\n\n“A Little Treat, Just for You.”",
-    offerCode: "EIDMUBARAK",
-    discountText: "FLAT 20% OFF ON ALL DESSERTS",
-    validTill: "Valid for 48 Hours",
-    ctaText: "Order Eid Special",
+      "May the divine blessings of Eid fill your heart and home with peace, happiness, and togetherness. Wishing you and your loved ones moments filled with warmth, smiles, and sweet memories.\n\nEid Mubarak to you and your cherished family! 💖\n\n“A Little Treat, Just for You.”",
+    offerCode: "",
+    discountText: "",
+    validTill: "",
+    ctaText: "Visit chocii 4 u",
     ctaLink: "/#full-menu-section",
   },
   {
     id: "christmas",
-    name: "Christmas Joy",
+    name: "Christmas Wishes",
     occasion: "CHRISTMAS",
     emoji: "🎄",
-    title: "Merry Christmas & Happy Holidays!",
-    subject: "🎄 Merry Christmas from chocii 4 u! A Sweet Gift for You",
+    title: "Merry Christmas & Season's Greetings!",
+    subject: "🎄 Merry Christmas from chocii 4 u! Warm Holiday Wishes",
     message:
-      "Tis the season of joy, warmth, and delicious treats! Celebrate the festive magic with our rich chocolate fudge cakes, holiday brownie bowls, and crispy churro hampers.\n\nDelivered fresh to your doorstep in Visakhapatnam.\n\n“A Little Treat, Just for You.”",
-    offerCode: "SANTA20",
-    discountText: "20% OFF + FREE SWEET ADDON",
-    validTill: "Valid through December 31st",
-    ctaText: "Enjoy Holiday Treats",
+      "Wishing you a peaceful, joyful, and merry Christmas! May your holiday season be blessed with laughter, love, and sweet comfort with family and loved ones.\n\nWarm season's greetings from chocii 4 u! 🎁\n\n“A Little Treat, Just for You.”",
+    offerCode: "",
+    discountText: "",
+    validTill: "",
+    ctaText: "Visit chocii 4 u",
     ctaLink: "/#full-menu-section",
   },
   {
     id: "new_year",
-    name: "New Year Celebration",
+    name: "New Year Wishes",
     occasion: "NEW_YEAR",
     emoji: "🎆",
     title: "Happy New Year! Sweet Beginnings",
-    subject: "✨ Happy New Year from chocii 4 u! Sweet Treats for You",
+    subject: "✨ Happy New Year from chocii 4 u! Wishing You a Wonderful Year Ahead",
     message:
-      "Here's to fresh beginnings, big smiles, and unforgettable sweet moments in the New Year!\n\nKickstart your year with handcrafted artisanal desserts made with pure chocolate and passion.\n\n“A Little Treat, Just for You.”",
-    offerCode: "NEWYEAR25",
-    discountText: "FLAT 25% OFF ON CELEBRATION BOXES",
-    validTill: "Valid for the New Year Week",
-    ctaText: "Celebrate New Year",
+      "Wishing you a bright, healthy, and prosperous New Year! May every day of the coming year bring new reasons to celebrate, fulfill your dreams, and cherish sweet moments.\n\nHappy New Year to you and your family! 🥂\n\n“A Little Treat, Just for You.”",
+    offerCode: "",
+    discountText: "",
+    validTill: "",
+    ctaText: "Visit chocii 4 u",
     ctaLink: "/#full-menu-section",
   },
   {
     id: "holi",
-    name: "Holi Sweets",
+    name: "Holi Wishes",
     occasion: "HOLI",
     emoji: "🎨",
-    title: "Happy Holi! Colors of Sweetness",
-    subject: "🎨 Splash into Sweet Delights this Holi with chocii 4 u",
+    title: "Happy Holi! Colors of Sweet Joy",
+    subject: "🎨 Wishing You a Colorful & Joyous Holi!",
     message:
-      "Wishing you a vibrant, joyful, and sweet Holi filled with laughter, colorful moments, and delicious treats!\n\nCool down with our chilled Fruizy creations and molten chocolate brownie bowls.",
-    offerCode: "HOLISWEETS",
-    discountText: "FLAT 20% OFF ON ALL ORDERS",
-    validTill: "Valid for Holi Weekend",
-    ctaText: "Grab Holi Treats",
-    ctaLink: "/#full-menu-section",
-  },
-  {
-    id: "flash_offer",
-    name: "Weekend Flash Sale",
-    occasion: "OFFER",
-    emoji: "⚡",
-    title: "Weekend Sweet Craving Flash Offer!",
-    subject: "⚡ Weekend Sweet Alert: Flat 20% OFF Today Only!",
-    message:
-      "Craving artisanal molten chocolate bowls, crispy cinnamon churros, or a refreshing dessert bowl? The weekend is here and so is your special treat!\n\nOrder fresh from our cloud kitchen in Visakhapatnam.\n\n“A Little Treat, Just for You.”",
-    offerCode: "WEEKEND20",
-    discountText: "FLAT 20% OFF TODAY ONLY",
-    validTill: "Valid until Midnight",
-    ctaText: "Claim Flash Deal",
+      "Wishing you a vibrant, joyful, and sweet Holi filled with colorful laughter, warmth, and celebration with your family and loved ones!\n\nHappy Holi from chocii 4 u! 🌸\n\n“A Little Treat, Just for You.”",
+    offerCode: "",
+    discountText: "",
+    validTill: "",
+    ctaText: "Visit chocii 4 u",
     ctaLink: "/#full-menu-section",
   },
   {
     id: "birthday",
-    name: "Birthday & Special Wishes",
+    name: "Birthday Wishes",
     occasion: "BIRTHDAY",
     emoji: "🎂",
-    title: "Special Celebration Greetings for You",
-    subject: "🎂 A Special Celebration Treat from chocii 4 u",
+    title: "Wishing You a Very Happy Birthday!",
+    subject: "🎂 Happy Birthday from chocii 4 u! Have a Wonderful Day",
     message:
-      "Because you deserve something extraordinary on your special day!\n\nCelebrate with our signature layered cakes, artisan brownie tubs, and handcrafted chocolate bowls crafted just for you.\n\n“A Little Treat, Just for You.”",
-    offerCode: "CELEBRATE15",
-    discountText: "15% OFF SPECIAL COMPLIMENT",
-    validTill: "Valid for 7 Days",
-    ctaText: "Order Celebration Cake",
+      "Wishing you a very Happy Birthday filled with joy, laughter, and sweet moments! May your special day be as delightful, bright, and memorable as you are.\n\nWarmest wishes on your birthday! 🎉\n\n“A Little Treat, Just for You.”",
+    offerCode: "",
+    discountText: "",
+    validTill: "",
+    ctaText: "Visit chocii 4 u",
+    ctaLink: "/#full-menu-section",
+  },
+  {
+    id: "warm_wishes",
+    name: "Sweet Greetings",
+    occasion: "GENERAL",
+    emoji: "🍫",
+    title: "Warm Wishes & Sweet Greetings from chocii 4 u",
+    subject: "🍫 Warm Sweet Greetings from chocii 4 u",
+    message:
+      "Sending you our warmest wishes and heartfelt appreciation for being a cherished part of the chocii 4 u family. Wishing you moments filled with happiness, peace, and sweet delight!\n\n“A Little Treat, Just for You.” ✨",
+    offerCode: "",
+    discountText: "",
+    validTill: "",
+    ctaText: "Visit chocii 4 u",
     ctaLink: "/#full-menu-section",
   },
 ];
@@ -168,16 +168,17 @@ interface RecipientItem {
 export default function AdminBroadcastPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Campaign Form State
+  // Campaign Form State - Pure Wishes by default (No forced coupons)
   const [title, setTitle] = useState(FESTIVE_PRESETS[0].title);
   const [occasion, setOccasion] = useState(FESTIVE_PRESETS[0].occasion);
   const [subject, setSubject] = useState(FESTIVE_PRESETS[0].subject);
   const [message, setMessage] = useState(FESTIVE_PRESETS[0].message);
   const [mediaUrl, setMediaUrl] = useState("");
   const [mediaType, setMediaType] = useState<"image" | "video">("image");
-  const [offerCode, setOfferCode] = useState(FESTIVE_PRESETS[0].offerCode);
-  const [discountText, setDiscountText] = useState(FESTIVE_PRESETS[0].discountText);
-  const [validTill, setValidTill] = useState(FESTIVE_PRESETS[0].validTill);
+  const [includeOffer, setIncludeOffer] = useState(false);
+  const [offerCode, setOfferCode] = useState("");
+  const [discountText, setDiscountText] = useState("");
+  const [validTill, setValidTill] = useState("");
   const [ctaText, setCtaText] = useState(FESTIVE_PRESETS[0].ctaText);
   const [ctaLink, setCtaLink] = useState(FESTIVE_PRESETS[0].ctaLink);
   const [isActiveBanner, setIsActiveBanner] = useState(true);
@@ -229,17 +230,18 @@ export default function AdminBroadcastPage() {
     loadData();
   }, []);
 
-  // Handle Preset Selection
+  // Handle Preset Selection (Always loads pure heartfelt wishes)
   const applyPreset = (preset: typeof FESTIVE_PRESETS[0]) => {
     setTitle(preset.title);
     setOccasion(preset.occasion);
     setSubject(preset.subject);
     setMessage(preset.message);
-    setOfferCode(preset.offerCode);
-    setDiscountText(preset.discountText);
-    setValidTill(preset.validTill);
-    setCtaText(preset.ctaText);
-    setCtaLink(preset.ctaLink);
+    setOfferCode(preset.offerCode || "");
+    setDiscountText(preset.discountText || "");
+    setValidTill(preset.validTill || "");
+    setIncludeOffer(Boolean(preset.offerCode));
+    setCtaText(preset.ctaText || "Visit chocii 4 u");
+    setCtaLink(preset.ctaLink || "/#full-menu-section");
   };
 
   // Handle File Upload (Picture or Video)
@@ -277,6 +279,10 @@ export default function AdminBroadcastPage() {
   // Save Campaign to Database (as Draft or Active Storefront Banner)
   const handleSaveCampaign = async () => {
     try {
+      const activeOfferCode = includeOffer && offerCode.trim() ? offerCode.trim().toUpperCase() : null;
+      const activeDiscountText = includeOffer && discountText.trim() ? discountText.trim() : null;
+      const activeValidTill = includeOffer && validTill.trim() ? validTill.trim() : null;
+
       const res = await fetch("/api/admin/broadcast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -287,9 +293,9 @@ export default function AdminBroadcastPage() {
           occasion,
           mediaUrl: mediaUrl.trim() || null,
           mediaType,
-          offerCode: offerCode.trim() || null,
-          discountText: discountText.trim() || null,
-          validTill: validTill.trim() || null,
+          offerCode: activeOfferCode,
+          discountText: activeDiscountText,
+          validTill: activeValidTill,
           ctaText,
           ctaLink,
           isActiveBanner,
@@ -336,6 +342,10 @@ export default function AdminBroadcastPage() {
     });
 
     try {
+      const activeOfferCode = includeOffer && offerCode.trim() ? offerCode.trim().toUpperCase() : null;
+      const activeDiscountText = includeOffer && discountText.trim() ? discountText.trim() : null;
+      const activeValidTill = includeOffer && validTill.trim() ? validTill.trim() : null;
+
       // First ensure campaign is saved
       const saveRes = await fetch("/api/admin/broadcast", {
         method: "POST",
@@ -347,9 +357,9 @@ export default function AdminBroadcastPage() {
           occasion,
           mediaUrl: mediaUrl.trim() || null,
           mediaType,
-          offerCode: offerCode.trim() || null,
-          discountText: discountText.trim() || null,
-          validTill: validTill.trim() || null,
+          offerCode: activeOfferCode,
+          discountText: activeDiscountText,
+          validTill: activeValidTill,
           ctaText,
           ctaLink,
           isActiveBanner,
@@ -372,9 +382,9 @@ export default function AdminBroadcastPage() {
             occasion,
             mediaUrl: mediaUrl.trim() || null,
             mediaType,
-            offerCode: offerCode.trim() || null,
-            discountText: discountText.trim() || null,
-            validTill: validTill.trim() || null,
+            offerCode: activeOfferCode,
+            discountText: activeDiscountText,
+            validTill: activeValidTill,
             ctaText,
             ctaLink,
           },
@@ -431,13 +441,17 @@ export default function AdminBroadcastPage() {
     }
   };
 
-  // Copy WhatsApp Formatted Broadcast Text
+  // Copy WhatsApp Formatted Broadcast Text (Respects no coupons by default)
   const handleCopyWhatsAppText = () => {
     const formatted = `*${title}* 🍫✨\n\nDear Foodie Friend,\n\n${message}\n\n${
-      offerCode ? `🎁 *EXCLUSIVE VOUCHER:* Use Code *${offerCode}* for *${discountText || "Flat Discount"}*!\n` : ""
-    }${validTill ? `⏰ _${validTill}_\n\n` : "\n"}${
-      mediaUrl ? `🎬 Media Preview: https://chocii-4-u.vercel.app${mediaUrl}\n\n` : ""
-    }👉 *Order fresh delights now:* https://chocii-4-u.vercel.app\n\n“A Little Treat, Just for You.” ✨`;
+      includeOffer && offerCode
+        ? `🎁 *EXCLUSIVE VOUCHER:* Use Code *${offerCode}* for *${discountText || "Flat Discount"}*!\n${
+            validTill ? `⏰ _${validTill}_\n` : ""
+          }\n`
+        : ""
+    }${
+      mediaUrl ? `🎬 Media Greeting: https://chocii-4-u.vercel.app${mediaUrl}\n\n` : ""
+    }👉 *Visit chocii 4 u:* https://chocii-4-u.vercel.app\n\n“A Little Treat, Just for You.” ✨`;
 
     navigator.clipboard.writeText(formatted);
     setCopiedWhatsApp(true);
@@ -500,10 +514,10 @@ export default function AdminBroadcastPage() {
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-caramel-400 flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
-            1-Click Festival & Occasion Templates
+            1-Click Festival & Celebration Greetings
           </span>
           <span className="text-[11px] text-cream-400/60">
-            Click any festival to auto-fill greeting, wishes & discount
+            Click any festival to auto-fill heartfelt wishes and warm greetings
           </span>
         </div>
 
@@ -520,8 +534,8 @@ export default function AdminBroadcastPage() {
               <span className="text-xs font-bold text-cream-100 group-hover:text-caramel-300">
                 {preset.name}
               </span>
-              <span className="text-[10px] text-caramel-400/80 font-mono">
-                {preset.offerCode}
+              <span className="text-[10px] text-caramel-400/80 font-sans">
+                Pure Wishes
               </span>
             </button>
           ))}
@@ -731,46 +745,74 @@ export default function AdminBroadcastPage() {
               )}
             </div>
 
-            {/* Offer Code & Discount Voucher Settings */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-cream-300">
-                  Coupon Code
+            {/* Optional Coupon / Discount Voucher Toggle (Off by default) */}
+            <div className="bg-cocoa-950/70 p-4 rounded-2xl border border-white/10 space-y-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-bold text-white flex items-center gap-2">
+                    <Gift className="w-3.5 h-3.5 text-caramel-400" />
+                    Attach Coupon Code or Discount (Optional)
+                  </div>
+                  <div className="text-[11px] text-cream-400/60">
+                    {includeOffer
+                      ? "Coupons enabled. Customers will receive this discount code along with the greeting."
+                      : "Off by default — sending pure festival wishes without any discounts or coupons."}
+                  </div>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={includeOffer}
+                    onChange={(e) => setIncludeOffer(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-caramel-500"></div>
                 </label>
-                <input
-                  type="text"
-                  value={offerCode}
-                  onChange={(e) => setOfferCode(e.target.value.toUpperCase().replace(/\s+/g, ""))}
-                  placeholder="e.g. DIWALI25"
-                  className="w-full bg-cocoa-950 border border-white/10 focus:border-caramel-500 rounded-xl px-4 py-2.5 text-sm font-mono tracking-widest text-caramel-300 placeholder-cream-400/40 outline-none font-bold"
-                />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-cream-300">
-                  Discount Description
-                </label>
-                <input
-                  type="text"
-                  value={discountText}
-                  onChange={(e) => setDiscountText(e.target.value)}
-                  placeholder="e.g. FLAT 25% OFF ON ALL ORDERS"
-                  className="w-full bg-cocoa-950 border border-white/10 focus:border-caramel-500 rounded-xl px-4 py-2.5 text-sm text-white placeholder-cream-400/40 outline-none"
-                />
-              </div>
+              {includeOffer && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-white/10 animate-in fade-in duration-150">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-cream-300">
+                      Coupon Code
+                    </label>
+                    <input
+                      type="text"
+                      value={offerCode}
+                      onChange={(e) => setOfferCode(e.target.value.toUpperCase().replace(/\s+/g, ""))}
+                      placeholder="e.g. FESTIVE20"
+                      className="w-full bg-cocoa-900 border border-white/10 focus:border-caramel-500 rounded-xl px-3 py-2 text-xs font-mono tracking-widest text-caramel-300 placeholder-cream-400/40 outline-none font-bold"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-cream-300">
-                  Valid Till
-                </label>
-                <input
-                  type="text"
-                  value={validTill}
-                  onChange={(e) => setValidTill(e.target.value)}
-                  placeholder="e.g. Valid through Sunday"
-                  className="w-full bg-cocoa-950 border border-white/10 focus:border-caramel-500 rounded-xl px-4 py-2.5 text-sm text-white placeholder-cream-400/40 outline-none"
-                />
-              </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-cream-300">
+                      Discount Description
+                    </label>
+                    <input
+                      type="text"
+                      value={discountText}
+                      onChange={(e) => setDiscountText(e.target.value)}
+                      placeholder="e.g. FLAT 20% OFF"
+                      className="w-full bg-cocoa-900 border border-white/10 focus:border-caramel-500 rounded-xl px-3 py-2 text-xs text-white placeholder-cream-400/40 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-cream-300">
+                      Valid Till
+                    </label>
+                    <input
+                      type="text"
+                      value={validTill}
+                      onChange={(e) => setValidTill(e.target.value)}
+                      placeholder="e.g. Valid this weekend"
+                      className="w-full bg-cocoa-900 border border-white/10 focus:border-caramel-500 rounded-xl px-3 py-2 text-xs text-white placeholder-cream-400/40 outline-none"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Call to Action Button & Website Banner Toggle */}
@@ -1021,7 +1063,7 @@ export default function AdminBroadcastPage() {
                     </p>
 
                     {/* Offer Voucher Box */}
-                    {offerCode && (
+                    {includeOffer && offerCode && (
                       <div className="bg-[#FFF9F3] border-2 border-dashed border-[#C58A55] rounded-xl p-3 text-center space-y-1">
                         <div className="text-[10px] font-bold tracking-wider text-[#8C532B] uppercase">
                           🎁 Festive Coupon Voucher
@@ -1098,7 +1140,7 @@ export default function AdminBroadcastPage() {
                         .replace(/\{\{name\}\}/gi, "Foodie Friend")}
                     </p>
 
-                    {offerCode && (
+                    {includeOffer && offerCode && (
                       <div className="bg-cocoa-950 border-2 border-dashed border-caramel-500/50 rounded-xl p-3 text-center space-y-1">
                         <div className="text-[10px] font-bold text-caramel-400 uppercase">
                           🎁 Exclusive Festive Voucher
@@ -1235,9 +1277,15 @@ export default function AdminBroadcastPage() {
                       setOccasion(camp.occasion);
                       if (camp.mediaUrl) setMediaUrl(camp.mediaUrl);
                       if (camp.mediaType) setMediaType(camp.mediaType);
-                      if (camp.offerCode) setOfferCode(camp.offerCode);
-                      if (camp.discountText) setDiscountText(camp.discountText);
-                      if (camp.validTill) setValidTill(camp.validTill);
+                      if (camp.offerCode) {
+                        setIncludeOffer(true);
+                        setOfferCode(camp.offerCode);
+                      } else {
+                        setIncludeOffer(false);
+                        setOfferCode("");
+                      }
+                      setDiscountText(camp.discountText || "");
+                      setValidTill(camp.validTill || "");
                       if (camp.ctaText) setCtaText(camp.ctaText);
                       if (camp.ctaLink) setCtaLink(camp.ctaLink);
                       window.scrollTo({ top: 0, behavior: "smooth" });

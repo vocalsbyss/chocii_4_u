@@ -142,7 +142,7 @@ export default function FestivalBroadcastModal() {
                 onClick={() => setIsOpen(true)}
                 className="text-[11px] font-bold text-caramel-300 hover:text-white underline underline-offset-2 transition-colors whitespace-nowrap"
               >
-                View Greeting & Deal
+                {broadcast.offerCode ? "View Greeting & Deal" : "View Festive Greeting"}
               </button>
               <button
                 onClick={() => setIsBannerVisible(false)}
@@ -278,7 +278,7 @@ export default function FestivalBroadcastModal() {
                     onClick={handleClose}
                     className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-caramel-500 to-caramel-600 hover:from-caramel-400 hover:to-caramel-500 text-cocoa-950 font-black text-sm tracking-wide px-6 py-3.5 rounded-2xl transition-all shadow-lg shadow-caramel-500/20 active:scale-98"
                   >
-                    <span>{broadcast.ctaText || "Claim Sweet Treat"}</span>
+                    <span>{broadcast.ctaText || "Visit chocii 4 u"}</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
 

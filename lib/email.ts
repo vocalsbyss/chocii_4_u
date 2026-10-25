@@ -397,7 +397,7 @@ export function generateFestivalBroadcastHtmlEmail({
     offerCode,
     discountText,
     validTill,
-    ctaText = "Claim Sweet Treat",
+    ctaText = "Visit chocii 4 u",
     ctaLink = "https://chocii-4-u.vercel.app",
   } = options;
 
