@@ -24,6 +24,7 @@ interface ArtisticParallaxSliderProps {
   products?: Product[];
   onSelectProduct?: (product: Product) => void;
   menuSectionRef?: React.RefObject<HTMLDivElement>;
+  hideHero?: boolean;
 }
 
 const TESTIMONIALS = [
@@ -58,6 +59,7 @@ export default function ArtisticParallaxSlider({
   products = [],
   onSelectProduct,
   menuSectionRef,
+  hideHero = false,
 }: ArtisticParallaxSliderProps) {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [menuSearchQuery, setMenuSearchQuery] = useState("");
@@ -131,11 +133,12 @@ export default function ArtisticParallaxSlider({
       {/* ========================================================================= */}
       {/* 1. GRAND HERO SECTION: EDITORIAL HEADLINE (FIRST PAGE - SAME AS NOW)      */}
       {/* ========================================================================= */}
-      <section
-        ref={heroRef}
-        onMouseMove={handleMouseMove}
-        className="relative w-full min-h-[92vh] sm:min-h-screen bg-white text-cocoa-950 overflow-hidden flex items-center justify-center select-none pt-20"
-      >
+      {!hideHero && (
+        <section
+          ref={heroRef}
+          onMouseMove={handleMouseMove}
+          className="relative w-full min-h-[92vh] sm:min-h-screen bg-white text-cocoa-950 overflow-hidden flex items-center justify-center select-none pt-20"
+        >
         {/* Crisp Pure White Background with Subtle High-Precision Grid */}
         <div
           className="absolute inset-0 pointer-events-none opacity-20"
@@ -252,6 +255,7 @@ export default function ArtisticParallaxSlider({
           <ChevronDown className="w-3.5 h-3.5 animate-bounce" />
         </div>
       </section>
+      )}
 
       {/* ========================================================================= */}
       {/* 2. DESSERT MENU CATALOG (FAST DIRECT ACCESS FOR CUSTOMERS)                */}

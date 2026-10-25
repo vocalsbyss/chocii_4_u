@@ -21,7 +21,12 @@ export default function PreviewClientPage({
   const menuSectionRef = useRef<HTMLDivElement>(null);
 
   const handleScrollToMenu = () => {
-    menuSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = document.getElementById("full-menu-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    } else {
+      menuSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
@@ -72,6 +77,7 @@ export default function PreviewClientPage({
           products={initialProducts}
           onSelectProduct={(p) => setSelectedProduct(p)}
           menuSectionRef={menuSectionRef}
+          hideHero={true}
         />
       </main>
 
