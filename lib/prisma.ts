@@ -52,14 +52,7 @@ function findBundledDb(): string | null {
   return null;
 }
 
-function resolveDatabaseUrl(): string | undefined {
-  const envUrl = process.env.DATABASE_URL;
-
-  // If a remote cloud database (e.g. Postgres, Supabase, Neon) is specified, use directly
-  if (envUrl && !envUrl.startsWith("file:")) {
-    return envUrl;
-  }
-
+function resolveDatabaseUrl(): string {
   const isVercel = Boolean(
     process.env.VERCEL ||
     process.env.AWS_LAMBDA_FUNCTION_NAME ||
@@ -94,15 +87,21 @@ function resolveDatabaseUrl(): string | undefined {
     return `file:${foundBundled}`;
   }
 
-  return envUrl;
+  const envUrl = process.env.DATABASE_URL;
+  if (envUrl && envUrl.startsWith("file:")) {
+    return envUrl;
+  }
+
+  return "file:./prisma/dev.db";
 }
 
 const resolvedUrl = resolveDatabaseUrl();
+process.env.DATABASE_URL = resolvedUrl;
 
 export const prisma =
   global.prisma ||
   new PrismaClient({
-    ...(resolvedUrl ? { datasources: { db: { url: resolvedUrl } } } : {}),
+    datasources: { db: { url: resolvedUrl } },
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
   });
 
