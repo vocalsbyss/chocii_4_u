@@ -181,10 +181,7 @@ export default function StorySections({
                   <div className="absolute inset-0 bg-gradient-to-t from-cocoa-950/80 via-transparent to-transparent" />
                   <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-caramel-400 bg-cocoa-950/90 px-3 py-1 rounded-full border border-stone-200">
-                        Signature Creation
-                      </span>
-                      <h4 className="text-2xl font-serif font-black text-white mt-2">
+                      <h4 className="text-2xl font-serif font-black text-white drop-shadow-md">
                         {signatureProduct.name}
                       </h4>
                     </div>

@@ -59,32 +59,28 @@ export default function ProductCard({ product, onSelect }: ProductCardProps) {
             unoptimized={Boolean(product.imageUrl?.startsWith("data:"))}
             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-cocoa-950/70 via-transparent to-transparent" />
-
-          {/* Featured / Sold out Badges */}
-          <div className="absolute top-3.5 left-3.5 flex flex-wrap gap-2">
-            {product.isFeatured && (
-              <span className="bg-caramel-500 text-cocoa-950 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Signature
-              </span>
-            )}
-            {isSoldOut && (
+          {/* Sold out Badge (only displayed if item is sold out, no signature overlay) */}
+          {isSoldOut && (
+            <div className="absolute top-3.5 left-3.5">
               <span className="bg-strawberry-600 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md">
                 Sold Out
               </span>
-            )}
-          </div>
-
-          {/* Category Tag */}
-          <div className="absolute bottom-3 left-4">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-cocoa-950 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-md border border-[#EADCCE]">
-              {product.category?.name || "Artisanal Dessert"}
-            </span>
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Product Details */}
-        <div className="p-5 sm:p-6 space-y-3">
+        {/* Product Details (Category and Signature badge placed cleanly here, NOT on picture) */}
+        <div className="p-5 sm:p-6 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-cocoa-900/60">
+              {product.category?.name || "Artisanal Dessert"}
+            </span>
+            {product.isFeatured && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-caramel-700 bg-caramel-500/15 px-2.5 py-0.5 rounded-full border border-caramel-500/30">
+                <Sparkles className="w-3 h-3 text-caramel-600" /> Signature
+              </span>
+            )}
+          </div>
           <Link href={`/menu/${product.slug}`} className="block">
             <h3 className="text-xl font-serif font-black text-cocoa-950 group-hover:text-caramel-600 transition-colors">
               {product.name}

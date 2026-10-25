@@ -89,7 +89,7 @@ export default function ProductModal({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Product Header & Image */}
+          {/* Product Header & Image (Clean photo without text overlay) */}
           <div className="relative h-64 sm:h-72 w-full overflow-hidden bg-[#F5EFEB]">
             <Image
               src={product.imageUrl}
@@ -99,20 +99,25 @@ export default function ProductModal({
               className="object-cover"
               unoptimized={Boolean(product.imageUrl?.startsWith("data:"))}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-cocoa-950/80 via-transparent to-transparent" />
-
-            <div className="absolute bottom-4 left-6 right-6">
-              <span className="text-[11px] uppercase tracking-widest text-caramel-400 font-bold bg-cocoa-950/90 px-2.5 py-1 rounded-full border border-caramel-500/30">
-                {product.category?.name || "Signature Dessert"}
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-serif font-black text-white mt-2 drop-shadow-md">
-                {product.name}
-              </h2>
-            </div>
           </div>
 
           {/* Body Content */}
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-5">
+            <div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] uppercase tracking-wider text-caramel-600 font-bold">
+                  {product.category?.name || "Artisanal Dessert"}
+                </span>
+                {product.isFeatured && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-caramel-700 bg-caramel-500/15 px-2.5 py-0.5 rounded-full border border-caramel-500/30">
+                    <Sparkles className="w-3 h-3 text-caramel-600" /> Signature
+                  </span>
+                )}
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-serif font-black text-cocoa-950 mt-1">
+                {product.name}
+              </h2>
+            </div>
             <p className="text-sm text-cocoa-900/80 leading-relaxed font-normal">
               {product.description}
             </p>

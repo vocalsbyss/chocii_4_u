@@ -122,11 +122,6 @@ export default function ClientProductDetailPage({ product }: { product: Product 
                     cameraPosition={[0, 0.2, 5.8]}
                     badgeText="Live 3D • Grand Pouring, Splashing Bar & Chips"
                   />
-                  <div className="absolute top-4 left-4 z-10 pointer-events-none">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-caramel-700 bg-white/95 px-3 py-1 rounded-full border border-stone-200 shadow-sm">
-                      {product.category?.name || "Signature Dessert"}
-                    </span>
-                  </div>
                 </div>
               ) : (
                 <div className="relative h-[460px] sm:h-[560px] lg:h-[600px] w-full rounded-3xl overflow-hidden border-2 border-stone-200 bg-white shadow-xl">
@@ -139,12 +134,6 @@ export default function ClientProductDetailPage({ product }: { product: Product 
                     className="object-cover"
                     unoptimized={Boolean(product.imageUrl?.startsWith("data:"))}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-cocoa-950/60 via-transparent to-transparent" />
-                  <div className="absolute top-4 left-4">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-white bg-cocoa-950/90 px-3 py-1 rounded-full border border-caramel-500/30">
-                      {product.category?.name || "Signature Dessert"}
-                    </span>
-                  </div>
                 </div>
               )}
 
@@ -165,6 +154,16 @@ export default function ClientProductDetailPage({ product }: { product: Product 
             {/* Right: Customization Controls */}
             <div className="lg:col-span-6 space-y-6">
               <div>
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span className="text-[11px] uppercase tracking-wider font-semibold text-cocoa-900/70 bg-stone-100 px-3 py-1 rounded-full border border-stone-200">
+                    {product.category?.name || "Artisanal Dessert"}
+                  </span>
+                  {product.isFeatured && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-caramel-700 bg-caramel-500/15 px-3 py-1 rounded-full border border-caramel-500/30">
+                      <Sparkles className="w-3 h-3 text-caramel-600" /> Signature
+                    </span>
+                  )}
+                </div>
                 <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-caramel-700 font-bold mb-2 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-caramel-600" />
                   ( need amazing desserts ) • Dessert Atelier
