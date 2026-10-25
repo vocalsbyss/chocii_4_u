@@ -138,21 +138,34 @@ export async function POST(req: NextRequest) {
       console.error("sendOtpEmail exception:", sendErr);
     }
 
-    const isLiveProvider =
-      emailResult.success &&
-      (emailResult.provider === "resend" ||
-        emailResult.provider === "brevo" ||
-        emailResult.provider === "smtp");
+    if (!emailResult.success) {
+      const errMsg = emailResult.error || "";
+      if (errMsg.includes("only send testing emails to your own email address") || errMsg.includes("testing emails to your own email")) {
+        return NextResponse.json(
+          {
+            error:
+              "Resend Sandbox Mode: Can only send to your account email (sidsuresh7264@gmail.com). Please enter sidsuresh7264@gmail.com, or verify your domain at resend.com/domains to email any customer.",
+          },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json(
+        {
+          error:
+            emailResult.error ||
+            "Unable to dispatch verification code to this email. Please verify your address and try again.",
+        },
+        { status: 400 }
+      );
+    }
 
     const response = NextResponse.json({
       success: true,
-      message: isLiveProvider
-        ? `A 6-digit verification code has been sent to your email (${normalizedEmail})`
-        : `Email service in setup mode. Your verification code is ${otpCode}`,
+      message: `A 6-digit verification code has been sent to your email (${normalizedEmail}). Please check your inbox.`,
       phone: normalizedPhone,
       email: normalizedEmail,
-      demoCode: !isLiveProvider ? otpCode : undefined,
-      isLiveEmail: isLiveProvider,
+      isLiveEmail: true,
       cooldownSeconds: 60,
     });
 
@@ -176,20 +189,14 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error: any) {
-    console.error("Resilient recovery in OTP send route:", error);
+    console.error("Critical error in OTP send route:", error);
 
-    // Never leave the user stuck on 500 error; provide working demo code
-    const fallbackOtp = otpCode || "123456";
-    const response = NextResponse.json({
-      success: true,
-      message: `Verification code: ${fallbackOtp}`,
-      phone: normalizedPhone || "guest",
-      email: normalizedEmail || "guest",
-      demoCode: fallbackOtp,
-      isLiveEmail: false,
-      cooldownSeconds: 30,
-    });
-
-    return response;
+    return NextResponse.json(
+      {
+        error:
+          "Unable to send verification code. Please check your internet connection and try again.",
+      },
+      { status: 500 }
+    );
   }
 }

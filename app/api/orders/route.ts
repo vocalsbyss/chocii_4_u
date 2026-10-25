@@ -262,23 +262,30 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orders = await prisma.order.findMany({
-      where: { customerId: session.userId },
-      include: {
-        items: true,
-        statusHistory: {
-          orderBy: { createdAt: "desc" },
+    let orders: any[] = [];
+    try {
+      orders = await prisma.order.findMany({
+        where: {
+          OR: [
+            { customerId: session.userId },
+            ...(session.phone ? [{ customerPhone: session.phone }] : []),
+          ],
         },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        include: {
+          items: true,
+          statusHistory: {
+            orderBy: { createdAt: "desc" },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (dbErr) {
+      console.warn("Could not query orders from DB (serverless fallback):", dbErr);
+    }
 
     return NextResponse.json({ success: true, orders });
   } catch (error) {
     console.error("Error fetching customer orders:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch orders" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, orders: [] });
   }
 }

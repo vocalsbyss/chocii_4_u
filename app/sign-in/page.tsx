@@ -30,7 +30,6 @@ function SignInContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
-  const [demoCode, setDemoCode] = useState<string | null>(null);
 
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -83,29 +82,15 @@ function SignInContent() {
       }
 
       setCooldown(data.cooldownSeconds || 60);
-      setDemoCode(data.demoCode || null);
       setStep(2);
       setOtpDigits(["", "", "", "", "", ""]);
-
-      // If demoCode is provided, pre-fill it for instant convenience
-      if (data.demoCode && data.demoCode.length === 6) {
-        setTimeout(() => {
-          const digits = data.demoCode.split("");
-          setOtpDigits(digits);
-        }, 100);
-      }
 
       // Auto-focus first OTP input after switching
       setTimeout(() => {
         otpInputRefs.current[0]?.focus();
       }, 200);
     } catch (err: any) {
-      console.warn("handleSendOtp fallback activated:", err);
-      setError(null);
-      setDemoCode("123456");
-      setStep(2);
-      setOtpDigits(["1", "2", "3", "4", "5", "6"]);
-      setCooldown(30);
+      setError(err.message || "Failed to send verification code. Please check your connection.");
     } finally {
       setLoading(false);
     }
@@ -201,9 +186,16 @@ function SignInContent() {
         throw new Error(data.error || "Verification failed. Please try again.");
       }
 
-      // Success: redirect to intended destination
-      router.push(redirectPath);
-      router.refresh();
+      // Success: store customer in localStorage and notify active listeners
+      if (data.user) {
+        try {
+          localStorage.setItem("cravings_customer_user", JSON.stringify(data.user));
+        } catch {}
+        window.dispatchEvent(new CustomEvent("cravings_auth_changed", { detail: data.user }));
+      }
+
+      // Full redirect to refresh session and render logged in state across the app
+      window.location.href = redirectPath;
     } catch (err: any) {
       setError(err.message || "Invalid verification code.");
     } finally {
@@ -362,53 +354,23 @@ function SignInContent() {
               </button>
             </div>
 
-            {/* Email Message Delivery Notification or Demo Code Helper */}
-            {demoCode ? (
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start justify-between gap-3 text-left">
-                <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-500/20 px-2 py-0.5 rounded-md">
-                    <span>⚡ Instant Verification Code</span>
-                  </div>
-                  <p className="text-xs text-cocoa-950 font-medium">
-                    Email service in setup mode. Your code is{" "}
-                    <strong className="font-mono text-sm tracking-widest text-caramel-700 bg-amber-500/20 px-2 py-0.5 rounded">
-                      {demoCode}
-                    </strong>
-                  </p>
-                  <p className="text-[10px] text-cocoa-900/60 font-mono">
-                    (Master bypass code 123456 is also accepted)
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const digits = demoCode.split("");
-                    setOtpDigits(digits);
-                    triggerVerification(demoCode);
-                  }}
-                  className="px-3.5 py-2 rounded-xl bg-caramel-500 hover:bg-caramel-400 text-cocoa-950 font-bold text-[11px] uppercase tracking-wider transition-all shrink-0 shadow-sm active:scale-95"
-                >
-                  Auto-fill
-                </button>
+            {/* Email Message Delivery Notification */}
+            <div className="p-4 rounded-2xl bg-caramel-500/10 border border-caramel-500/30 flex items-start gap-3 text-left">
+              <div className="w-9 h-9 rounded-full bg-caramel-500/20 text-caramel-800 flex items-center justify-center shrink-0 mt-0.5 border border-caramel-500/30">
+                <Mail className="w-4 h-4 text-caramel-700" />
               </div>
-            ) : (
-              <div className="p-4 rounded-2xl bg-caramel-500/10 border border-caramel-500/30 flex items-start gap-3 text-left">
-                <div className="w-9 h-9 rounded-full bg-caramel-500/20 text-caramel-800 flex items-center justify-center shrink-0 mt-0.5 border border-caramel-500/30">
-                  <Mail className="w-4 h-4 text-caramel-700" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-cocoa-950">
-                    Verification Code Sent to Your Inbox
-                  </p>
-                  <p className="text-[11px] text-cocoa-900/75 leading-relaxed">
-                    Please check your email messages at <strong className="break-all">{email}</strong>. Check your Spam or Promotions folder if it doesn't appear in Primary.
-                  </p>
-                  <p className="text-[10px] text-caramel-800 font-mono pt-0.5">
-                    Mobile registered for orders: +91 {phone}
-                  </p>
-                </div>
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-cocoa-950">
+                  Verification Code Sent to Your Inbox
+                </p>
+                <p className="text-[11px] text-cocoa-900/75 leading-relaxed">
+                  Please check your email messages at <strong className="break-all">{email}</strong>. Check your Spam or Promotions folder if it doesn't appear in Primary.
+                </p>
+                <p className="text-[10px] text-caramel-800 font-mono pt-0.5">
+                  Mobile registered for orders: +91 {phone}
+                </p>
               </div>
-            )}
+            </div>
 
             {/* 6-Digit Inputs (Mobile responsive: fits 320px-430px comfortably) */}
             <div className="flex justify-between gap-1.5 sm:gap-2 on-paste" onPaste={handlePaste}>

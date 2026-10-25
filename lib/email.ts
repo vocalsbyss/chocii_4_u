@@ -316,6 +316,8 @@ export async function sendOtpEmail({
   const html = generateOtpHtmlEmail({ name: customerName, code, phone });
   const plainText = `Hello ${customerName},\n\nYour chocii 4 u verification code is: ${code}.\nValid for 15 minutes.\n\nchocii 4 u — A Little Treat, Just for You.`;
 
+  let lastError: string | undefined;
+
   // 1. Try Resend if configured (with default provisioned key fallback)
   const defaultResendKey = Buffer.from(
     "cmVfQjcyVzJFM05fOFJCZ3BHOEdSQ2RCY1NSR2s3WnZyYm94",
@@ -325,7 +327,12 @@ export async function sendOtpEmail({
 
   if (resendApiKey) {
     try {
-      const from = process.env.EMAIL_FROM || "chocii 4 u <onboarding@resend.dev>";
+      // Free Resend accounts can only send from onboarding@resend.dev unless custom domain is verified
+      let from = (process.env.EMAIL_FROM || "").trim();
+      if (!from || from.includes("@gmail.com") || from.includes("@yahoo.com") || from.includes("@outlook.com")) {
+        from = "chocii 4 u <onboarding@resend.dev>";
+      }
+
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -345,9 +352,14 @@ export async function sendOtpEmail({
         console.log(`[Resend] Successfully dispatched OTP email to ${toEmail}. Message ID: ${data.id}`);
         return { success: true, provider: "resend", messageId: data.id };
       }
+      
       console.warn("[Resend] Email dispatch response:", res.status, data);
-    } catch (err) {
+      if (data?.message) {
+        lastError = data.message;
+      }
+    } catch (err: any) {
       console.error("[Resend] Error:", err);
+      lastError = err?.message || "Resend connection error";
     }
   }
 
@@ -374,8 +386,10 @@ export async function sendOtpEmail({
         return { success: true, provider: "brevo", messageId: data?.messageId };
       }
       console.warn("[Brevo] Email dispatch response:", res.status, data);
-    } catch (err) {
+      if (data?.message) lastError = data.message;
+    } catch (err: any) {
       console.error("[Brevo] Error:", err);
+      lastError = err?.message;
     }
   }
 
@@ -385,15 +399,17 @@ export async function sendOtpEmail({
     if (smtpSuccess) {
       return { success: true, provider: "smtp" };
     }
+    lastError = "SMTP connection could not deliver message";
   }
 
-  // 4. Fallback: Log to secure server console (always works in development/testing with 0 costs)
+  // 4. Log to server console for tracking
   console.log(
-    `\n======================================================\n[CHOCII 4 U FREE EMAIL OTP DISPATCH]\nRecipient Email : ${toEmail}\nCustomer Name   : ${customerName}\nMobile Phone    : ${phone || "N/A"}\nVerification Code: ${code}\nSubject         : ${subject}\n======================================================\n`
+    `\n======================================================\n[CHOCII 4 U EMAIL OTP DISPATCH]\nRecipient Email : ${toEmail}\nCustomer Name   : ${customerName}\nMobile Phone    : ${phone || "N/A"}\nVerification Code: ${code}\nSubject         : ${subject}\nLast Error      : ${lastError || "None"}\n======================================================\n`
   );
 
   return {
-    success: true,
+    success: false,
     provider: "development",
+    error: lastError || "Failed to deliver email. Please check your email address.",
   };
 }

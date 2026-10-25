@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, User, Menu as MenuIcon, X, ArrowRight, Shield, Sparkles } from "lucide-react";
+import { ShoppingBag, User, Menu as MenuIcon, X, ArrowRight, Shield, Sparkles, LogOut } from "lucide-react";
 import { getStoredCart } from "@/lib/cart";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
@@ -32,7 +32,7 @@ export default function Navbar({ onOpenCart }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [customer, setCustomer] = useState<{ name: string; phone: string } | null>(null);
+  const [customer, setCustomer] = useState<{ name: string; phone: string; email?: string } | null>(null);
 
   // Update cart count and listen for changes
   useEffect(() => {
@@ -47,18 +47,47 @@ export default function Navbar({ onOpenCart }: NavbarProps) {
     return () => window.removeEventListener("cravings_cart_updated", updateCount);
   }, []);
 
-  // Check customer session
+  // Check customer session with instant localStorage caching & live event syncing
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.authenticated && data.user) {
-          setCustomer(data.user);
-        } else {
-          setCustomer(null);
-        }
-      })
-      .catch(() => setCustomer(null));
+    // 1. Immediately read from localStorage for instant display (no flash of "Sign In")
+    try {
+      const cached = localStorage.getItem("cravings_customer_user");
+      if (cached) {
+        setCustomer(JSON.parse(cached));
+      }
+    } catch {}
+
+    const syncAuth = () => {
+      fetch("/api/auth/me")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.authenticated && data.user) {
+            setCustomer(data.user);
+            try {
+              localStorage.setItem("cravings_customer_user", JSON.stringify(data.user));
+            } catch {}
+          } else {
+            setCustomer(null);
+            try {
+              localStorage.removeItem("cravings_customer_user");
+            } catch {}
+          }
+        })
+        .catch(() => {});
+    };
+
+    syncAuth();
+
+    const handleAuthChanged = (e: any) => {
+      if (e?.detail) {
+        setCustomer(e.detail);
+      } else {
+        syncAuth();
+      }
+    };
+
+    window.addEventListener("cravings_auth_changed", handleAuthChanged);
+    return () => window.removeEventListener("cravings_auth_changed", handleAuthChanged);
   }, [pathname]);
 
   // Handle scroll detection
@@ -187,24 +216,40 @@ export default function Navbar({ onOpenCart }: NavbarProps) {
 
             {/* Customer Session / Sign In Button */}
             {customer ? (
-              <div className="hidden sm:flex items-center gap-2 bg-cocoa-950/5 border border-[#EADCCE] rounded-full px-3 py-1.5 text-xs text-cocoa-950">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="font-medium truncate max-w-[90px]">
-                  {customer.name.split(" ")[0]}
+              <div className="hidden sm:flex items-center gap-2 bg-cocoa-950/5 dark:bg-white/10 border border-[#EADCCE] dark:border-white/20 rounded-full px-3.5 py-1.5 text-xs text-cocoa-950 dark:text-cream-100 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-semibold truncate max-w-[95px]">
+                  {customer.name?.split(" ")[0] || "Account"}
                 </span>
+                <span className="text-stone-300 dark:text-stone-600">|</span>
                 <Link
                   href="/orders"
-                  className="text-caramel-600 hover:text-caramel-700 text-[11px] font-semibold underline underline-offset-2 ml-0.5"
+                  className="text-caramel-600 dark:text-caramel-400 hover:text-caramel-700 font-bold uppercase text-[10px] tracking-wider"
                 >
                   Orders
                 </Link>
+                <button
+                  onClick={async () => {
+                    await fetch("/api/auth/logout", { method: "POST" });
+                    try {
+                      localStorage.removeItem("cravings_customer_user");
+                    } catch {}
+                    setCustomer(null);
+                    window.dispatchEvent(new CustomEvent("cravings_auth_changed", { detail: null }));
+                    window.location.href = "/";
+                  }}
+                  className="text-stone-400 hover:text-strawberry-500 ml-0.5 p-0.5 transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
               </div>
             ) : (
               <Link
                 href="/sign-in"
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-cocoa-950 hover:text-white bg-cocoa-950/5 hover:bg-cocoa-950 border border-[#EADCCE] px-3.5 py-1.5 rounded-full transition-all"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-cocoa-950 dark:text-cream-100 hover:text-white bg-cocoa-950/5 dark:bg-white/10 hover:bg-cocoa-950 dark:hover:bg-caramel-600 border border-[#EADCCE] dark:border-white/20 px-3.5 py-1.5 rounded-full transition-all"
               >
-                <User className="w-3 h-3 text-caramel-600" />
+                <User className="w-3 h-3 text-caramel-600 dark:text-caramel-400" />
                 Sign In
               </Link>
             )}
@@ -319,27 +364,43 @@ export default function Navbar({ onOpenCart }: NavbarProps) {
               </a>
 
               {customer ? (
-                <div className="flex items-center justify-between py-2 text-xs text-cocoa-900">
-                  <span>Signed in as <strong className="text-caramel-600">{customer.name}</strong></span>
-                  <button
-                    onClick={async () => {
-                      await fetch("/api/auth/logout", { method: "POST" });
-                      setCustomer(null);
-                      setMobileMenuOpen(false);
-                      window.location.reload();
-                    }}
-                    className="text-strawberry-600 underline font-semibold"
+                <div className="p-3.5 rounded-2xl bg-cocoa-950/5 dark:bg-white/5 border border-[#EADCCE] dark:border-white/10 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs text-cocoa-900 dark:text-cream-100">
+                    <span className="flex items-center gap-1.5 font-medium truncate max-w-[200px]">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                      Signed in as <strong className="text-caramel-600 dark:text-caramel-400 ml-1">{customer.name}</strong>
+                    </span>
+                    <button
+                      onClick={async () => {
+                        await fetch("/api/auth/logout", { method: "POST" });
+                        try {
+                          localStorage.removeItem("cravings_customer_user");
+                        } catch {}
+                        setCustomer(null);
+                        setMobileMenuOpen(false);
+                        window.dispatchEvent(new CustomEvent("cravings_auth_changed", { detail: null }));
+                        window.location.href = "/";
+                      }}
+                      className="text-strawberry-600 dark:text-strawberry-400 hover:underline font-bold text-xs shrink-0"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                  <Link
+                    href="/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full text-center py-2 rounded-xl bg-cocoa-950 dark:bg-caramel-600 text-white font-bold text-xs uppercase tracking-wider shadow-sm"
                   >
-                    Logout
-                  </button>
+                    View My Orders
+                  </Link>
                 </div>
               ) : (
                 <Link
                   href="/sign-in"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-2.5 rounded-full bg-cocoa-950 text-white text-xs font-bold uppercase tracking-wider"
+                  className="w-full text-center py-2.5 rounded-full bg-cocoa-950 dark:bg-caramel-600 text-white text-xs font-bold uppercase tracking-wider"
                 >
-                  Sign In with Phone OTP
+                  Sign In with Email & Phone
                 </Link>
               )}
 
