@@ -1,3 +1,7 @@
+if (typeof process !== "undefined" && process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith("file:")) {
+  delete process.env.DATABASE_URL;
+}
+
 import { PrismaClient } from "@prisma/client";
 import path from "path";
 import fs from "fs";
