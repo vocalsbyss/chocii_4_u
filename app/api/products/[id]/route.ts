@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -23,7 +26,10 @@ export async function GET(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, product });
+    return NextResponse.json(
+      { success: true, product },
+      { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
+    );
   } catch (error) {
     console.error("Error fetching single product:", error);
     return NextResponse.json(
@@ -46,8 +52,10 @@ export async function PUT(
     const { id } = params;
     const body = await req.json();
 
-    const existingProduct = await prisma.product.findUnique({
-      where: { id },
+    const existingProduct = await prisma.product.findFirst({
+      where: {
+        OR: [{ id }, { slug: id }],
+      },
       include: { addons: true },
     });
 
@@ -87,13 +95,13 @@ export async function PUT(
       // If addons are provided, update/replace addons
       if (Array.isArray(addons)) {
         await tx.productAddon.deleteMany({
-          where: { productId: id },
+          where: { productId: existingProduct.id },
         });
 
         for (const addon of addons) {
           await tx.productAddon.create({
             data: {
-              productId: id,
+              productId: existingProduct.id,
               name: addon.name.trim(),
               price: parseFloat(addon.price),
               isAvailable: addon.isAvailable !== false,
@@ -103,7 +111,7 @@ export async function PUT(
       }
 
       return tx.product.update({
-        where: { id },
+        where: { id: existingProduct.id },
         data: {
           name: name !== undefined ? name.trim() : undefined,
           slug: slug !== undefined ? slug.trim().toLowerCase() : undefined,
@@ -133,10 +141,13 @@ export async function PUT(
       });
     });
 
-    return NextResponse.json({
-      success: true,
-      product: updated,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        product: updated,
+      },
+      { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
+    );
   } catch (error) {
     console.error("Error updating product:", error);
     return NextResponse.json(
@@ -157,14 +168,42 @@ export async function DELETE(
     }
 
     const { id } = params;
-    await prisma.product.delete({
-      where: { id },
+    const existing = await prisma.product.findFirst({
+      where: {
+        OR: [{ id }, { slug: id }],
+      },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "Product deleted successfully",
+    if (!existing) {
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Product already deleted or removed",
+        },
+        { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
+      );
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.productAddon.deleteMany({
+        where: { productId: existing.id },
+      });
+      await tx.orderItem.updateMany({
+        where: { productId: existing.id },
+        data: { productId: null },
+      });
+      await tx.product.delete({
+        where: { id: existing.id },
+      });
     });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Product deleted successfully",
+      },
+      { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
+    );
   } catch (error) {
     console.error("Error deleting product:", error);
     return NextResponse.json(

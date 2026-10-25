@@ -97,6 +97,7 @@ export default function ProductModal({
               fill
               sizes="(max-width: 768px) 100vw, 600px"
               className="object-cover"
+              unoptimized={Boolean(product.imageUrl?.startsWith("data:"))}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-cocoa-950/80 via-transparent to-transparent" />
 

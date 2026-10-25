@@ -18,7 +18,7 @@ export default async function HomePage() {
       orderBy: [{ isFeatured: "desc" }, { createdAt: "asc" }],
     });
 
-    if (rawProducts && rawProducts.length > 0) {
+    if (rawProducts) {
       const products: Product[] = rawProducts.map((p) => ({
         ...p,
         createdAt: p.createdAt.toISOString(),
@@ -30,6 +30,6 @@ export default async function HomePage() {
     console.warn("HomePage: Database query failed, serving fallback products:", error);
   }
 
-  // Graceful fallback to guaranteed catalog data
+  // Graceful fallback to guaranteed catalog data ONLY on database error
   return <ClientHomePage initialProducts={getFallbackProducts()} />;
 }

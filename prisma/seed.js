@@ -114,38 +114,29 @@ async function main() {
     },
   ];
 
-  for (const prod of productsData) {
-    const { addons, ...prodDetails } = prod;
-    const existing = await prisma.product.findUnique({
-      where: { slug: prod.slug },
-    });
-
-    let productRecord;
-    if (existing) {
-      productRecord = await prisma.product.update({
-        where: { slug: prod.slug },
+  // 2. Seed Products (Only if table is completely empty to preserve admin modifications)
+  const existingProductCount = await prisma.product.count();
+  if (existingProductCount > 0) {
+    console.log(`Database already has ${existingProductCount} products. Skipping product seed to preserve admin modifications.`);
+  } else {
+    for (const prod of productsData) {
+      const { addons, ...prodDetails } = prod;
+      const productRecord = await prisma.product.create({
         data: prodDetails,
       });
-      // Delete existing addons and re-add
-      await prisma.productAddon.deleteMany({
-        where: { productId: productRecord.id },
-      });
-    } else {
-      productRecord = await prisma.product.create({
-        data: prodDetails,
-      });
-    }
 
-    for (const addon of addons) {
-      await prisma.productAddon.create({
-        data: {
-          productId: productRecord.id,
-          name: addon.name,
-          price: addon.price,
-          isAvailable: true,
-        },
-      });
+      for (const addon of addons) {
+        await prisma.productAddon.create({
+          data: {
+            productId: productRecord.id,
+            name: addon.name,
+            price: addon.price,
+            isAvailable: true,
+          },
+        });
+      }
     }
+    console.log("Initial default products seeded successfully.");
   }
 
   // 3. Seed Default Store Settings

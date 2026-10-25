@@ -23,6 +23,7 @@ export const metadata: Metadata = {
 export default async function MenuPage() {
   let products: Product[] = [];
   let categories: Category[] = [];
+  let hasDbError = false;
 
   try {
     const [rawProducts, rawCategories] = await Promise.all([
@@ -40,7 +41,7 @@ export default async function MenuPage() {
       }),
     ]);
 
-    if (rawProducts && rawProducts.length > 0) {
+    if (rawProducts) {
       products = rawProducts.map((p) => ({
         ...p,
         createdAt: p.createdAt.toISOString(),
@@ -48,19 +49,22 @@ export default async function MenuPage() {
       }));
     }
 
-    if (rawCategories && rawCategories.length > 0) {
+    if (rawCategories) {
       categories = rawCategories.map((c) => ({ ...c }));
     }
   } catch (error) {
+    hasDbError = true;
     console.warn("MenuPage: Database query failed, serving fallback menu:", error);
   }
 
-  // Graceful fallback if database returned empty or errored
-  if (products.length === 0) {
-    products = getFallbackProducts();
-  }
-  if (categories.length === 0) {
-    categories = getFallbackCategories();
+  // Graceful fallback ONLY if database actually failed
+  if (hasDbError) {
+    if (products.length === 0) {
+      products = getFallbackProducts();
+    }
+    if (categories.length === 0) {
+      categories = getFallbackCategories();
+    }
   }
 
   const jsonLd = {

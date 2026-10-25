@@ -56,6 +56,7 @@ export default function ProductCard({ product, onSelect }: ProductCardProps) {
             alt={product.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            unoptimized={Boolean(product.imageUrl?.startsWith("data:"))}
             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-cocoa-950/70 via-transparent to-transparent" />

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
@@ -22,9 +22,28 @@ export default function ClientMenuPage({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+
+  useEffect(() => {
+    try {
+      const storedDeleted = localStorage.getItem("cravings_deleted_items");
+      const deletedKeys: string[] = storedDeleted ? JSON.parse(storedDeleted) : [];
+      const storedOverrides = localStorage.getItem("cravings_product_overrides");
+      const overrides: Record<string, Product> = storedOverrides ? JSON.parse(storedOverrides) : {};
+
+      const synced = initialProducts
+        .filter((p) => !deletedKeys.includes(p.id) && !deletedKeys.includes(p.slug))
+        .map((p) => {
+          const override = overrides[p.id] || overrides[p.slug];
+          return override ? { ...p, ...override } : p;
+        });
+
+      setProducts(synced);
+    } catch {}
+  }, [initialProducts]);
 
   // Filter products by category and search query
-  const filteredProducts = initialProducts.filter((p) => {
+  const filteredProducts = products.filter((p) => {
     const matchesCategory =
       selectedCategory === "ALL" || p.category?.slug === selectedCategory;
     const matchesSearch =

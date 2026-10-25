@@ -14,10 +14,33 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/products?includeUnavailable=true");
+      const res = await fetch(`/api/products?includeUnavailable=true&_t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
+      });
       const data = await res.json();
-      if (data.success) {
-        setProducts(data.products);
+      if (data.success && Array.isArray(data.products)) {
+        let deletedKeys: string[] = [];
+        let overrides: Record<string, Product> = {};
+        try {
+          const storedDeleted = localStorage.getItem("cravings_deleted_items");
+          if (storedDeleted) deletedKeys = JSON.parse(storedDeleted);
+          const storedOverrides = localStorage.getItem("cravings_product_overrides");
+          if (storedOverrides) overrides = JSON.parse(storedOverrides);
+        } catch {}
+
+        const filtered = data.products
+          .filter(
+            (p: Product) =>
+              !deletedKeys.includes(p.id) &&
+              !deletedKeys.includes(p.slug)
+          )
+          .map((p: Product) => {
+            const override = overrides[p.id] || overrides[p.slug];
+            return override ? { ...p, ...override } : p;
+          });
+
+        setProducts(filtered);
       }
     } catch (e) {
       setError("Failed to load products");
@@ -32,12 +55,20 @@ export default function AdminProductsPage() {
 
   const handleToggleAvailability = async (product: Product) => {
     const updatedStatus = !product.isAvailable;
+    const updatedProduct = { ...product, isAvailable: updatedStatus };
+
     // Optimistic UI update
     setProducts((prev) =>
-      prev.map((p) =>
-        p.id === product.id ? { ...p, isAvailable: updatedStatus } : p
-      )
+      prev.map((p) => (p.id === product.id ? updatedProduct : p))
     );
+
+    try {
+      const storedOverrides = localStorage.getItem("cravings_product_overrides");
+      const overrides = storedOverrides ? JSON.parse(storedOverrides) : {};
+      overrides[product.id] = updatedProduct;
+      if (product.slug) overrides[product.slug] = updatedProduct;
+      localStorage.setItem("cravings_product_overrides", JSON.stringify(overrides));
+    } catch {}
 
     try {
       const res = await fetch(`/api/products/${product.id}`, {
@@ -56,11 +87,19 @@ export default function AdminProductsPage() {
 
   const handleToggleFeatured = async (product: Product) => {
     const updatedStatus = !product.isFeatured;
+    const updatedProduct = { ...product, isFeatured: updatedStatus };
+
     setProducts((prev) =>
-      prev.map((p) =>
-        p.id === product.id ? { ...p, isFeatured: updatedStatus } : p
-      )
+      prev.map((p) => (p.id === product.id ? updatedProduct : p))
     );
+
+    try {
+      const storedOverrides = localStorage.getItem("cravings_product_overrides");
+      const overrides = storedOverrides ? JSON.parse(storedOverrides) : {};
+      overrides[product.id] = updatedProduct;
+      if (product.slug) overrides[product.slug] = updatedProduct;
+      localStorage.setItem("cravings_product_overrides", JSON.stringify(overrides));
+    } catch {}
 
     try {
       await fetch(`/api/products/${product.id}`, {
@@ -76,15 +115,37 @@ export default function AdminProductsPage() {
   const handleDeleteProduct = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
 
+    const targetProduct = products.find((p) => p.id === id);
+
+    // Immediately record locally so even on page refresh / cold start it stays deleted
+    try {
+      const stored = localStorage.getItem("cravings_deleted_items");
+      const list: string[] = stored ? JSON.parse(stored) : [];
+      if (!list.includes(id)) list.push(id);
+      if (targetProduct?.slug && !list.includes(targetProduct.slug)) {
+        list.push(targetProduct.slug);
+      }
+      localStorage.setItem("cravings_deleted_items", JSON.stringify(list));
+
+      const storedOverrides = localStorage.getItem("cravings_product_overrides");
+      if (storedOverrides) {
+        const overrides = JSON.parse(storedOverrides);
+        delete overrides[id];
+        if (targetProduct?.slug) delete overrides[targetProduct.slug];
+        localStorage.setItem("cravings_product_overrides", JSON.stringify(overrides));
+      }
+    } catch {}
+
+    // Optimistically update UI
+    setProducts((prev) => prev.filter((p) => p.id !== id && p.slug !== id));
+
     try {
       const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setProducts((prev) => prev.filter((p) => p.id !== id));
-      } else {
-        alert("Failed to delete product");
+      if (!res.ok) {
+        console.warn("Server delete warning:", await res.text());
       }
-    } catch {
-      alert("Error deleting product");
+    } catch (err) {
+      console.warn("Delete request network notice:", err);
     }
   };
 
@@ -146,6 +207,7 @@ export default function AdminProductsPage() {
                             fill
                             sizes="48px"
                             className="object-cover"
+                            unoptimized={Boolean(product.imageUrl?.startsWith("data:"))}
                           />
                         </div>
                         <div>

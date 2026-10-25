@@ -467,6 +467,7 @@ export default function CheckoutPage() {
                         fill
                         sizes="48px"
                         className="object-cover"
+                        unoptimized={Boolean(item.imageUrl?.startsWith("data:"))}
                       />
                     </div>
                     <div className="flex-1 min-w-0">

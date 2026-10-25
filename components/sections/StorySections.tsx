@@ -176,6 +176,7 @@ export default function StorySections({
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    unoptimized={Boolean(signatureProduct.imageUrl?.startsWith("data:"))}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-cocoa-950/80 via-transparent to-transparent" />
                   <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
@@ -300,6 +301,7 @@ export default function StorySections({
               alt={activeMood.dessertName}
               fill
               className="object-cover"
+              unoptimized={Boolean(activeMoodProduct.imageUrl?.startsWith("data:"))}
             />
             <div className="absolute top-3 left-3 bg-cocoa-950/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-caramel-400 uppercase tracking-widest border border-stone-200">
               {activeMood.tag}

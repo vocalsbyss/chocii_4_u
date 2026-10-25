@@ -137,6 +137,7 @@ export default function ClientProductDetailPage({ product }: { product: Product 
                     priority
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-cover"
+                    unoptimized={Boolean(product.imageUrl?.startsWith("data:"))}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-cocoa-950/60 via-transparent to-transparent" />
                   <div className="absolute top-4 left-4">

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -35,11 +38,18 @@ export async function GET(req: NextRequest) {
       orderBy: { sortOrder: "asc" },
     });
 
-    return NextResponse.json({
-      success: true,
-      products,
-      categories,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        products,
+        categories,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching products, returning fallback catalog:", error);
     const { getFallbackProducts, getFallbackCategories } = await import("@/lib/data/fallbackData");
@@ -117,10 +127,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      product,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        product,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error creating product:", error);
     return NextResponse.json(
