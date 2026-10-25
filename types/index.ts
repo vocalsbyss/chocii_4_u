@@ -120,7 +120,6 @@ export interface StoreSettings {
   openingHours: string;
   contactPhone: string;
   instagramUrl: string;
-  homepage_style?: string;
 }
 
 export interface CustomerSession {

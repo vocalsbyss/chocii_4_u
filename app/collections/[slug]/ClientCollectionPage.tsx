@@ -9,9 +9,6 @@ import ProductModal from "@/components/ui/ProductModal";
 import CartDrawer from "@/components/ui/CartDrawer";
 import { ArrowLeft, Sparkles, Filter } from "lucide-react";
 import { Product, Category } from "@/types";
-import { usePreview } from "@/components/preview/PreviewContext";
-import CoolDockCategoryBar from "@/components/ui/CoolDockCategoryBar";
-import { useRouter } from "next/navigation";
 
 interface ClientCollectionPageProps {
   category: { id: string; name: string; slug: string };
@@ -26,9 +23,6 @@ export default function ClientCollectionPage({
 }: ClientCollectionPageProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const router = useRouter();
-  const { isPreviewActive, isOfficialCoolDock } = usePreview();
-  const isCoolDockMode = isPreviewActive || isOfficialCoolDock;
 
   return (
     <div className="min-h-screen bg-cocoa-950 text-cream-100 flex flex-col font-sans">
@@ -125,21 +119,6 @@ export default function ClientCollectionPage({
         onClose={() => setSelectedProduct(null)}
         onAddedToCart={() => setIsCartOpen(true)}
       />
-
-      {/* Interactive CoolDock Floating Category Bar (Preview / CoolDock mode) */}
-      {isCoolDockMode && (
-        <CoolDockCategoryBar
-          categories={allCategories}
-          selectedCategory={category.slug}
-          onSelectCategory={(slug) => {
-            if (slug === "ALL") {
-              router.push("/menu");
-            } else {
-              router.push(`/collections/${slug}`);
-            }
-          }}
-        />
-      )}
 
       <Footer />
     </div>

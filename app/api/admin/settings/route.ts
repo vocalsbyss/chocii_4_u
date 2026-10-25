@@ -28,7 +28,6 @@ export async function GET() {
         contactPhone: settings.contactPhone || "+91 86883 67177",
         instagramUrl:
           settings.instagramUrl || "https://instagram.com/chocii4u.official",
-        homepage_style: settings.homepage_style || "cooldock",
       },
     });
   } catch (error) {
@@ -69,7 +68,6 @@ export async function PUT(req: NextRequest) {
       "openingHours",
       "contactPhone",
       "instagramUrl",
-      "homepage_style",
     ];
 
     for (const key of allowedKeys) {
