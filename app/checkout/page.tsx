@@ -18,6 +18,10 @@ import {
   AlertCircle,
   RefreshCw,
   Lock,
+  Gift,
+  Tag,
+  Check,
+  X,
 } from "lucide-react";
 import { getStoredCart, calculateCartSummary, clearCart } from "@/lib/cart";
 import { CartItem } from "@/types";
@@ -43,6 +47,19 @@ export default function CheckoutPage() {
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Coupon & Offers State
+  const [couponCodeInput, setCouponCodeInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    description: string;
+    discountType: string;
+    discountValue: number;
+    discountAmount: number;
+  } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
 
   // 1. Verify Customer Session (Mandatory Customer Authentication)
   useEffect(() => {
@@ -77,6 +94,49 @@ export default function CheckoutPage() {
 
   const summary = calculateCartSummary(cart);
 
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const finalGrandTotal = Math.max(0, summary.grandTotal - discountAmount);
+
+  const handleApplyCoupon = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!couponCodeInput.trim()) return;
+
+    setCouponLoading(true);
+    setCouponError(null);
+    setCouponSuccess(null);
+
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: couponCodeInput.trim(),
+          subtotal: summary.subtotal,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Invalid coupon code.");
+      }
+
+      setAppliedCoupon(data.coupon);
+      setCouponSuccess(`Coupon "${data.coupon.code}" applied! You saved ₹${data.coupon.discountAmount}.`);
+    } catch (err: any) {
+      setCouponError(err.message || "Failed to apply coupon.");
+      setAppliedCoupon(null);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCodeInput("");
+    setCouponError(null);
+    setCouponSuccess(null);
+  };
+
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -106,6 +166,7 @@ export default function CheckoutPage() {
           landmark: landmark.trim() || undefined,
           specialInstructions: deliveryInstructions.trim() || undefined,
           paymentMethod,
+          couponCode: appliedCoupon ? appliedCoupon.code : undefined,
           items: cart.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
@@ -423,6 +484,80 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
+              {/* Coupon Code Section */}
+              <div className="pt-3 border-t border-white/10 space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-caramel-400 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-caramel-400" />
+                  Have a Coupon or Offer Code?
+                </label>
+
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-emerald-400 tracking-wide font-mono">
+                          {appliedCoupon.code}
+                        </span>
+                        <p className="text-[10px] text-emerald-300/80">
+                          {appliedCoupon.description || `₹${appliedCoupon.discountAmount} discount applied`}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="p-1 rounded-lg text-cream-300/60 hover:text-strawberry-400 hover:bg-strawberry-500/10 transition-colors"
+                      title="Remove coupon"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. FESTIVE20, SWEET10"
+                      value={couponCodeInput}
+                      onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleApplyCoupon();
+                        }
+                      }}
+                      className="flex-1 bg-cocoa-950/80 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono uppercase tracking-wider text-cream-100 placeholder:text-cream-300/30 focus:outline-none focus:border-caramel-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleApplyCoupon()}
+                      disabled={couponLoading || !couponCodeInput.trim()}
+                      className="px-4 py-2 bg-caramel-500/20 hover:bg-caramel-500/30 border border-caramel-500/40 text-caramel-300 font-bold text-xs rounded-xl transition-all disabled:opacity-40"
+                    >
+                      {couponLoading ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        "Apply"
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                {couponError && (
+                  <p className="text-[11px] text-strawberry-400 font-medium flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    {couponError}
+                  </p>
+                )}
+                {couponSuccess && !appliedCoupon && (
+                  <p className="text-[11px] text-emerald-400 font-medium">
+                    {couponSuccess}
+                  </p>
+                )}
+              </div>
+
               {/* Pricing breakdown */}
               <div className="space-y-2 text-xs text-cream-200 border-t border-white/10 pt-4">
                 <div className="flex justify-between">
@@ -439,9 +574,20 @@ export default function CheckoutPage() {
                     )}
                   </span>
                 </div>
+
+                {appliedCoupon && discountAmount > 0 && (
+                  <div className="flex justify-between text-emerald-400 font-medium">
+                    <span className="flex items-center gap-1">
+                      <Tag className="w-3 h-3" />
+                      Coupon Discount ({appliedCoupon.code})
+                    </span>
+                    <span>-₹{discountAmount}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between text-base font-bold text-cream-100 pt-3 border-t border-white/10">
                   <span>Grand Total</span>
-                  <span className="text-caramel-400 text-lg">₹{summary.grandTotal}</span>
+                  <span className="text-caramel-400 text-lg">₹{finalGrandTotal}</span>
                 </div>
               </div>
 
@@ -457,7 +603,7 @@ export default function CheckoutPage() {
                   </>
                 ) : (
                   <>
-                    Place Order Directly (₹{summary.grandTotal})
+                    Place Order Directly (₹{finalGrandTotal})
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}

@@ -80,10 +80,11 @@ export default function FestivalBroadcastModal() {
     setTimeout(() => setCopiedCode(false), 2500);
   };
 
-  // Occasion styling helper
+  // Occasion styling helper covering all celebrated Indian festivals
   let occasionBadge = "✨ Festive Greetings";
   let bgGradient = "from-caramel-600/30 to-cocoa-900";
   const occ = (broadcast.occasion || "").toUpperCase();
+
   if (occ.includes("DIWALI")) {
     occasionBadge = "🪔 Happy Diwali Celebrations";
     bgGradient = "from-amber-600/30 via-caramel-700/20 to-cocoa-950";
@@ -99,9 +100,50 @@ export default function FestivalBroadcastModal() {
   } else if (occ.includes("HOLI")) {
     occasionBadge = "🎨 Happy Holi Celebrations";
     bgGradient = "from-pink-600/30 via-caramel-700/20 to-cocoa-950";
+  } else if (occ.includes("PONGAL") || occ.includes("SANKRANTI")) {
+    occasionBadge = "🌾 Makar Sankranti & Pongal Wishes";
+    bgGradient = "from-amber-600/30 via-yellow-700/20 to-cocoa-950";
+  } else if (occ.includes("LOHRI")) {
+    occasionBadge = "🔥 Happy Lohri Celebrations";
+    bgGradient = "from-orange-600/30 via-red-700/20 to-cocoa-950";
+  } else if (occ.includes("RAKSHA") || occ.includes("RAKHI")) {
+    occasionBadge = "🧵 Happy Raksha Bandhan";
+    bgGradient = "from-pink-600/30 via-purple-700/20 to-cocoa-950";
+  } else if (occ.includes("JANMASHTAMI")) {
+    occasionBadge = "🦚 Krishna Janmashtami Wishes";
+    bgGradient = "from-teal-600/30 via-blue-700/20 to-cocoa-950";
+  } else if (occ.includes("GANESH")) {
+    occasionBadge = "🐘 Happy Ganesh Chaturthi";
+    bgGradient = "from-amber-600/30 via-orange-700/20 to-cocoa-950";
+  } else if (occ.includes("NAVRATRI") || occ.includes("DURGA")) {
+    occasionBadge = "🔱 Shubh Navratri & Durga Puja";
+    bgGradient = "from-rose-600/30 via-amber-700/20 to-cocoa-950";
+  } else if (occ.includes("DUSSEHRA") || occ.includes("VIJAYADASHAMI")) {
+    occasionBadge = "🏹 Happy Dussehra Wishes";
+    bgGradient = "from-amber-600/30 via-orange-700/20 to-cocoa-950";
+  } else if (occ.includes("ONAM")) {
+    occasionBadge = "🌼 Happy Onam Celebrations";
+    bgGradient = "from-yellow-600/30 via-emerald-700/20 to-cocoa-950";
+  } else if (occ.includes("BAISAKHI") || occ.includes("VAISAKHI")) {
+    occasionBadge = "🌾 Happy Baisakhi Wishes";
+    bgGradient = "from-amber-600/30 via-yellow-700/20 to-cocoa-950";
+  } else if (occ.includes("UGADI") || occ.includes("GUDI")) {
+    occasionBadge = "🌿 Happy Ugadi & Gudi Padwa";
+    bgGradient = "from-emerald-600/30 via-teal-700/20 to-cocoa-950";
+  } else if (occ.includes("GURU NANAK")) {
+    occasionBadge = "🪔 Guru Nanak Jayanti Gurpurab";
+    bgGradient = "from-amber-600/30 via-orange-700/20 to-cocoa-950";
+  } else if (occ.includes("SHIVRATRI")) {
+    occasionBadge = "🔱 Maha Shivratri Blessings";
+    bgGradient = "from-indigo-600/30 via-purple-700/20 to-cocoa-950";
+  } else if (occ.includes("REPUBLIC") || occ.includes("INDEPENDENCE")) {
+    occasionBadge = "🇮🇳 Proud National Celebration";
+    bgGradient = "from-orange-600/30 via-emerald-700/20 to-cocoa-950";
   } else if (occ.includes("OFFER")) {
-    occasionBadge = "⚡ Exclusive Sweet Offer";
+    occasionBadge = "⚡ Special Sweet Offer";
     bgGradient = "from-amber-700/30 via-caramel-800/20 to-cocoa-950";
+  } else if (broadcast.occasion) {
+    occasionBadge = `✨ ${broadcast.occasion} Wishes`;
   }
 
   return (

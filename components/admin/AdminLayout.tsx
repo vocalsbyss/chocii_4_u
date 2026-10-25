@@ -19,6 +19,7 @@ import {
   Users,
   Activity,
   Megaphone,
+  Tag,
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -118,8 +119,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     },
     {
       href: "/admin/broadcast",
-      label: "Broadcast & Offers",
+      label: "Broadcast & Wishes",
       icon: Megaphone,
+    },
+    {
+      href: "/admin/coupons",
+      label: "Coupons & Discounts",
+      icon: Tag,
     },
     {
       href: "/admin/products",

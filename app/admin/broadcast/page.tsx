@@ -28,6 +28,8 @@ import {
   ChevronRight,
   Flame,
 } from "lucide-react";
+import AdminFestivalReminder from "@/components/admin/AdminFestivalReminder";
+import { INDIAN_FESTIVALS } from "@/lib/festivals";
 
 // Pre-configured festive greeting & celebration wish presets (No forced coupons)
 const FESTIVE_PRESETS = [
@@ -509,8 +511,11 @@ export default function AdminBroadcastPage() {
         </div>
       )}
 
+      {/* Festival Reminder Banner */}
+      <AdminFestivalReminder />
+
       {/* 2. Festive Quick Presets */}
-      <div className="bg-cocoa-900/60 border border-white/10 p-5 rounded-3xl space-y-3">
+      <div className="bg-cocoa-900/60 border border-white/10 p-5 rounded-3xl space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-caramel-400 flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
@@ -539,6 +544,43 @@ export default function AdminBroadcastPage() {
               </span>
             </button>
           ))}
+        </div>
+
+        {/* All 27+ Indian Festivals Selector */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-white/5">
+          <span className="text-xs font-medium text-cream-300/80 flex items-center gap-1.5">
+            <span>🇮🇳</span>
+            <span>Looking for another festival? Select from every celebrated Indian festival:</span>
+          </span>
+          <select
+            onChange={(e) => {
+              const selectedId = e.target.value;
+              if (!selectedId) return;
+              const fest = INDIAN_FESTIVALS.find((f) => f.id === selectedId);
+              if (fest) {
+                setTitle(`${fest.emoji} ${fest.headline}`);
+                setSubject(`${fest.emoji} ${fest.name} Wishes from chocii 4 u!`);
+                setOccasion(fest.name.toUpperCase());
+                setMessage(
+                  `${fest.wish}\n\n${fest.significance}\n\nWarmest festive wishes from the chocii 4 u artisanal dessert kitchen team.\n\n“A Little Treat, Just for You.” ✨`
+                );
+                if (fest.suggestedOfferCode) {
+                  setOfferCode(fest.suggestedOfferCode);
+                }
+              }
+            }}
+            defaultValue=""
+            className="bg-cocoa-950 border border-white/15 rounded-xl px-3 py-2 text-xs text-cream-100 focus:outline-none focus:border-caramel-500 max-w-sm"
+          >
+            <option value="" disabled>
+              -- Select Any Indian Festival (Pongal, Rakhi, Dussehra, Onam, Baisakhi...) --
+            </option>
+            {INDIAN_FESTIVALS.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.emoji} {f.name} ({f.category})
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

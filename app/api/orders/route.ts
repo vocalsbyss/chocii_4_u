@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       landmark,
       specialInstructions,
       paymentMethod = "CASH_ON_DELIVERY",
+      couponCode,
       items,
     } = body;
 
@@ -180,7 +181,37 @@ export async function POST(req: NextRequest) {
 
     const calculatedDeliveryFee =
       calculatedSubtotal >= freeDeliveryThreshold ? 0 : deliveryFeeSetting;
-    const calculatedGrandTotal = calculatedSubtotal + calculatedDeliveryFee;
+
+    // Validate coupon code if provided
+    let validatedDiscount = 0;
+    let appliedCoupon: any = null;
+    if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
+      const cleanCode = couponCode.trim().toUpperCase().replace(/\s+/g, "");
+      const foundCoupon = await prisma.coupon.findUnique({
+        where: { code: cleanCode },
+      });
+
+      if (foundCoupon && foundCoupon.isActive) {
+        const notExpired = !foundCoupon.validTill || new Date() <= new Date(foundCoupon.validTill);
+        const withinLimit = !foundCoupon.usageLimit || foundCoupon.usedCount < foundCoupon.usageLimit;
+        const meetsMin = !foundCoupon.minOrderValue || calculatedSubtotal >= foundCoupon.minOrderValue;
+
+        if (notExpired && withinLimit && meetsMin) {
+          appliedCoupon = foundCoupon;
+          if (foundCoupon.discountType === "PERCENTAGE") {
+            let disc = (calculatedSubtotal * foundCoupon.discountValue) / 100;
+            if (foundCoupon.maxDiscount && disc > foundCoupon.maxDiscount) {
+              disc = foundCoupon.maxDiscount;
+            }
+            validatedDiscount = Math.round(disc);
+          } else {
+            validatedDiscount = Math.round(Math.min(foundCoupon.discountValue, calculatedSubtotal));
+          }
+        }
+      }
+    }
+
+    const calculatedGrandTotal = Math.max(0, calculatedSubtotal + calculatedDeliveryFee - validatedDiscount);
 
     // Generate unique order number & secure tracking token
     const orderNumber = generateOrderNumber();
@@ -203,7 +234,8 @@ export async function POST(req: NextRequest) {
             : null,
           subtotal: calculatedSubtotal,
           deliveryFee: calculatedDeliveryFee,
-          discount: 0,
+          discount: validatedDiscount,
+          couponCode: appliedCoupon ? appliedCoupon.code : null,
           total: calculatedGrandTotal,
           paymentMethod:
             paymentMethod === "RAZORPAY" ? "RAZORPAY" : "CASH_ON_DELIVERY",
@@ -226,6 +258,13 @@ export async function POST(req: NextRequest) {
           statusHistory: true,
         },
       });
+
+      if (appliedCoupon) {
+        await tx.coupon.update({
+          where: { id: appliedCoupon.id },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
 
       return newOrder;
     });

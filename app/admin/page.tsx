@@ -18,6 +18,7 @@ import {
   AlertCircle,
   X,
 } from "lucide-react";
+import AdminFestivalReminder from "@/components/admin/AdminFestivalReminder";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any | null>(null);
@@ -99,6 +100,9 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Smart Festival & Special Day Reminder Banner */}
+      <AdminFestivalReminder />
+
       {/* Top Banner & Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
