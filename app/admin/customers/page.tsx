@@ -26,6 +26,7 @@ import {
   MessageCircle,
   X,
   Trash2,
+  Megaphone,
 } from "lucide-react";
 
 // Official WhatsApp Icon SVG
@@ -346,6 +347,14 @@ export default function AdminCustomersPage() {
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-caramel-400" : ""}`} />
             <span>Refresh</span>
           </button>
+
+          <Link
+            href="/admin/broadcast"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-caramel-500 to-caramel-600 hover:from-caramel-400 hover:to-caramel-500 text-cocoa-950 font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-caramel-500/25 transition-all active:scale-95"
+          >
+            <Megaphone className="w-4 h-4" />
+            <span>Festival Broadcast Hub</span>
+          </Link>
 
           <button
             onClick={handleOpenBulkBroadcast}

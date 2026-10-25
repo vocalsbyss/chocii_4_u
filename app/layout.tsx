@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import TrafficTracker from "@/components/analytics/TrafficTracker";
+import FestivalBroadcastModal from "@/components/ui/FestivalBroadcastModal";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -95,6 +96,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-[#FAF7F2] text-cocoa-950 antialiased font-sans overflow-x-hidden max-w-full w-full">
         <ThemeProvider>
+          <FestivalBroadcastModal />
           <TrafficTracker />
           {children}
         </ThemeProvider>

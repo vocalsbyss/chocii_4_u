@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Users,
   Activity,
+  Megaphone,
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -114,6 +115,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       href: "/admin/customers",
       label: "Customer Database",
       icon: Users,
+    },
+    {
+      href: "/admin/broadcast",
+      label: "Broadcast & Offers",
+      icon: Megaphone,
     },
     {
       href: "/admin/products",

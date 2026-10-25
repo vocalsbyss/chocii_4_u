@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
         orderNumber: true,
         customerName: true,
         customerPhone: true,
+        customerEmail: true,
         deliveryAddress: true,
         total: true,
         fulfillmentStatus: true,
@@ -75,6 +76,7 @@ export async function GET(req: NextRequest) {
       name: string;
       phone: string;
       rawDigits: string;
+      email: string | null;
       totalOrders: number;
       totalSpent: number;
       registeredAt: string;
@@ -113,6 +115,7 @@ export async function GET(req: NextRequest) {
         name: u.name && u.name.trim() !== "Valued Guest" ? u.name.trim() : (latestOrder ? latestOrder.deliveryAddress ? "Guest Patron" : "Valued Guest" : "Valued Guest"),
         phone: displayPhone,
         rawDigits: digits,
+        email: u.email || null,
         totalOrders,
         totalSpent,
         registeredAt: u.createdAt.toISOString(),
@@ -140,6 +143,7 @@ export async function GET(req: NextRequest) {
           name: ord.customerName && ord.customerName.trim() ? ord.customerName.trim() : "Guest Patron",
           phone: displayPhone,
           rawDigits: digits,
+          email: ord.customerEmail || null,
           totalOrders: 1,
           totalSpent: ord.total || 0,
           registeredAt: ord.createdAt.toISOString(),
@@ -154,6 +158,9 @@ export async function GET(req: NextRequest) {
         const existing = customerMap.get(digits)!;
         if (existing.name === "Valued Guest" && ord.customerName && ord.customerName.trim()) {
           existing.name = ord.customerName.trim();
+        }
+        if (!existing.email && ord.customerEmail) {
+          existing.email = ord.customerEmail;
         }
         if (!existing.latestAddress && ord.deliveryAddress) {
           existing.latestAddress = ord.deliveryAddress;

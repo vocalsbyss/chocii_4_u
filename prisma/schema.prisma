@@ -171,4 +171,30 @@ model UploadedImage {
   @@index([filename])
 }
 
+model Broadcast {
+  id              String    @id @default(cuid())
+  title           String
+  occasion        String    @default("GENERAL") // "DIWALI" | "EID" | "CHRISTMAS" | "NEW_YEAR" | "HOLI" | "OFFER" | "BIRTHDAY" | "GENERAL"
+  subject         String
+  message         String
+  mediaUrl        String?
+  mediaType       String?   @default("image") // "image" | "video"
+  offerCode       String?
+  discountText    String?
+  validTill       String?
+  ctaText         String    @default("Claim Sweet Treat")
+  ctaLink         String    @default("/#full-menu-section")
+  isActiveBanner  Boolean   @default(true)
+  sentEmailCount  Int       @default(0)
+  totalRecipients Int       @default(0)
+  status          String    @default("DRAFT") // "DRAFT" | "PUBLISHED" | "SENT"
+  lastSentAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([isActiveBanner])
+  @@index([createdAt])
+}
+
+
 

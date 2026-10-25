@@ -22,6 +22,11 @@ export async function GET(
     else if (ext === ".gif") contentType = "image/gif";
     else if (ext === ".avif") contentType = "image/avif";
     else if (ext === ".svg") contentType = "image/svg+xml";
+    else if (ext === ".mp4") contentType = "video/mp4";
+    else if (ext === ".webm") contentType = "video/webm";
+    else if (ext === ".mov") contentType = "video/quicktime";
+    else if (ext === ".ogg") contentType = "video/ogg";
+
 
     // 1. Check local /tmp/uploads (fastest in serverless)
     const tmpFilePath = path.join("/tmp", "uploads", safeFilename);

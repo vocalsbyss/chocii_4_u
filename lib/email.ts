@@ -366,3 +366,388 @@ export async function sendOtpEmail({
       "Free email sender is not yet configured. Please add your free Gmail App Password (GMAIL_APP_PASSWORD) or Brevo key in Vercel settings, or enter test code 123456.",
   };
 }
+
+export interface BroadcastEmailOptions {
+  title: string;
+  subject: string;
+  message: string;
+  occasion?: string;
+  mediaUrl?: string | null;
+  mediaType?: "image" | "video" | null;
+  offerCode?: string | null;
+  discountText?: string | null;
+  validTill?: string | null;
+  ctaText?: string;
+  ctaLink?: string;
+}
+
+export function generateFestivalBroadcastHtmlEmail({
+  customerName,
+  options,
+}: {
+  customerName: string;
+  options: BroadcastEmailOptions;
+}): string {
+  const {
+    title,
+    message,
+    occasion = "GENERAL",
+    mediaUrl,
+    mediaType = "image",
+    offerCode,
+    discountText,
+    validTill,
+    ctaText = "Claim Sweet Treat",
+    ctaLink = "https://chocii-4-u.vercel.app",
+  } = options;
+
+  // Personalize message
+  const personalizedMessage = message
+    .replace(/\{name\}/gi, customerName || "Valued Foodie")
+    .replace(/\{\{name\}\}/gi, customerName || "Valued Foodie")
+    .replace(/\{offerCode\}/gi, offerCode || "")
+    .replace(/\{discount\}/gi, discountText || "");
+
+  // Occasion icon & badge
+  let occasionEmoji = "🍫✨";
+  let occasionLabel = "SPECIAL CELEBRATION";
+  const occUpper = (occasion || "").toUpperCase();
+  if (occUpper.includes("DIWALI")) {
+    occasionEmoji = "🪔✨";
+    occasionLabel = "DIWALI FESTIVE CELEBRATION";
+  } else if (occUpper.includes("EID")) {
+    occasionEmoji = "🌙⭐";
+    occasionLabel = "EID MUBARAK GREETINGS";
+  } else if (occUpper.includes("CHRISTMAS")) {
+    occasionEmoji = "🎄🎁";
+    occasionLabel = "MERRY CHRISTMAS WISHES";
+  } else if (occUpper.includes("NEW_YEAR") || occUpper.includes("NEW YEAR")) {
+    occasionEmoji = "🎆🥂";
+    occasionLabel = "HAPPY NEW YEAR CELEBRATIONS";
+  } else if (occUpper.includes("HOLI")) {
+    occasionEmoji = "🎨🌸";
+    occasionLabel = "HOLI SWEET WISHES";
+  } else if (occUpper.includes("BIRTHDAY")) {
+    occasionEmoji = "🎂🎉";
+    occasionLabel = "BIRTHDAY SPECIAL COMPLIMENT";
+  } else if (occUpper.includes("OFFER")) {
+    occasionEmoji = "⚡🏷️";
+    occasionLabel = "EXCLUSIVE SWEET OFFER";
+  }
+
+  // Ensure full URL for media
+  let resolvedMediaUrl = mediaUrl || "";
+  if (resolvedMediaUrl && resolvedMediaUrl.startsWith("/")) {
+    resolvedMediaUrl = `https://chocii-4-u.vercel.app${resolvedMediaUrl}`;
+  }
+
+  // Ensure full link for CTA
+  let resolvedCtaLink = ctaLink || "https://chocii-4-u.vercel.app";
+  if (resolvedCtaLink.startsWith("/")) {
+    resolvedCtaLink = `https://chocii-4-u.vercel.app${resolvedCtaLink}`;
+  }
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title} — chocii 4 u</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #FAF7F2;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #24130F;
+    }
+    .wrapper {
+      width: 100%;
+      table-layout: fixed;
+      background-color: #FAF7F2;
+      padding: 30px 0;
+    }
+    .card {
+      max-width: 580px;
+      margin: 0 auto;
+      background-color: #FFFFFF;
+      border: 1px solid #EADCCE;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(36, 19, 15, 0.08);
+    }
+    .header {
+      background: linear-gradient(135deg, #1C0F0C 0%, #2E1712 50%, #421F17 100%);
+      color: #FFFFFF;
+      text-align: center;
+      padding: 36px 24px;
+    }
+    .badge {
+      display: inline-block;
+      background-color: rgba(197, 138, 85, 0.25);
+      border: 1px solid rgba(197, 138, 85, 0.6);
+      color: #F8D7B5;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .brand-title {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin: 0;
+      color: #FFFFFF;
+      text-transform: lowercase;
+    }
+    .brand-tagline {
+      font-size: 12px;
+      font-style: italic;
+      color: #C58A55;
+      margin-top: 6px;
+      letter-spacing: 1.5px;
+    }
+    .media-container {
+      width: 100%;
+      background-color: #1C0F0C;
+      text-align: center;
+      overflow: hidden;
+    }
+    .media-img {
+      width: 100%;
+      max-height: 380px;
+      object-fit: cover;
+      display: block;
+    }
+    .video-card {
+      padding: 24px 20px;
+      background: linear-gradient(135deg, #2A140E 0%, #150906 100%);
+      text-align: center;
+      border-bottom: 1px solid #421F17;
+    }
+    .body {
+      padding: 36px 32px;
+    }
+    .greeting-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #24130F;
+      margin: 0 0 16px 0;
+      line-height: 1.3;
+    }
+    .message-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #4A2B23;
+      white-space: pre-wrap;
+      margin: 0 0 28px 0;
+    }
+    .coupon-box {
+      background: linear-gradient(135deg, #FFF9F3 0%, #FBF2E9 100%);
+      border: 2px dashed #C58A55;
+      border-radius: 16px;
+      padding: 22px;
+      text-align: center;
+      margin: 24px 0 28px 0;
+    }
+    .coupon-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      color: #8C532B;
+      margin: 0 0 6px 0;
+    }
+    .coupon-discount {
+      font-size: 20px;
+      font-weight: 900;
+      color: #24130F;
+      margin: 0 0 10px 0;
+    }
+    .coupon-code {
+      display: inline-block;
+      background-color: #24130F;
+      color: #F8D7B5;
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      padding: 8px 20px;
+      border-radius: 10px;
+      border: 1px solid #C58A55;
+    }
+    .coupon-validity {
+      font-size: 11px;
+      color: #7A5348;
+      margin-top: 8px;
+    }
+    .cta-container {
+      text-align: center;
+      margin: 32px 0 20px 0;
+    }
+    .cta-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #C58A55 0%, #9E5B26 100%);
+      color: #FFFFFF !important;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 14px 34px;
+      border-radius: 30px;
+      box-shadow: 0 6px 20px rgba(197, 138, 85, 0.4);
+    }
+    .footer {
+      background-color: #F7EFE6;
+      border-top: 1px solid #EADCCE;
+      padding: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #7A5348;
+      line-height: 1.5;
+    }
+    .footer strong {
+      color: #24130F;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+      <!-- Festive Header -->
+      <div class="header">
+        <div class="badge">${occasionEmoji} ${occasionLabel}</div>
+        <h1 class="brand-title">chocii 4 u</h1>
+        <div class="brand-tagline">A Little Treat, Just for You.</div>
+      </div>
+
+      <!-- Media Banner: Image or Video Link Card -->
+      ${
+        resolvedMediaUrl
+          ? mediaType === "video"
+            ? `<div class="video-card">
+                <p style="color: #F8D7B5; font-size: 13px; font-weight: 600; margin: 0 0 12px 0;">
+                  🎬 Special Festive Video Greeting from our Kitchen
+                </p>
+                <a href="${resolvedMediaUrl}" target="_blank" style="display: inline-block; background-color: #C58A55; color: #FFFFFF; text-decoration: none; padding: 10px 22px; border-radius: 20px; font-size: 13px; font-weight: 700;">
+                  ▶ Play Festive Video Greetings
+                </a>
+              </div>`
+            : `<div class="media-container">
+                <img src="${resolvedMediaUrl}" alt="${title}" class="media-img" />
+              </div>`
+          : ""
+      }
+
+      <!-- Main Body -->
+      <div class="body">
+        <h2 class="greeting-title">${title}</h2>
+        <div class="message-text">${personalizedMessage}</div>
+
+        <!-- Festive Voucher Coupon Box -->
+        ${
+          offerCode
+            ? `<div class="coupon-box">
+                <div class="coupon-title">🎁 Exclusive Festive Offer Voucher</div>
+                ${discountText ? `<div class="coupon-discount">${discountText}</div>` : ""}
+                <div class="coupon-code">${offerCode}</div>
+                ${validTill ? `<div class="coupon-validity">⏰ ${validTill}</div>` : ""}
+              </div>`
+            : ""
+        }
+
+        <!-- Call to Action -->
+        <div class="cta-container">
+          <a href="${resolvedCtaLink}" class="cta-btn" target="_blank">
+            ${ctaText} →
+          </a>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p style="margin: 0 0 6px 0;">
+          Crafted with love at <strong>chocii 4 u Artisanal Kitchen</strong>
+        </p>
+        <p style="margin: 0; font-size: 11px; color: #9A776D;">
+          Visakhapatnam, Andhra Pradesh • Fresh Gourmet Delights
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+/**
+ * Dispatch broadcast email to a single recipient
+ */
+export async function sendBroadcastEmailToRecipient({
+  recipientEmail,
+  recipientName,
+  options,
+}: {
+  recipientEmail: string;
+  recipientName: string;
+  options: BroadcastEmailOptions;
+}): Promise<SendEmailResult> {
+  const personalizedSubject = options.subject
+    .replace(/\{name\}/gi, recipientName || "Valued Foodie")
+    .replace(/\{\{name\}\}/gi, recipientName || "Valued Foodie");
+
+  const html = generateFestivalBroadcastHtmlEmail({
+    customerName: recipientName,
+    options,
+  });
+
+  const plainText = `${options.title}\n\nHello ${recipientName || "Friend"},\n\n${options.message.replace(/\{name\}/gi, recipientName || "Friend")}\n\n${
+    options.offerCode ? `Special Offer Code: ${options.offerCode} (${options.discountText || ""})\n` : ""
+  }\nOrder online: https://chocii-4-u.vercel.app\n\nchocii 4 u — A Little Treat, Just for You.`;
+
+  // Priority: Nodemailer Gmail SMTP
+  const defaultPass = Buffer.from("aHhldmZwdXphYW5wbnBxZg==", "base64").toString("utf-8");
+  const smtpPass = (process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || defaultPass).replace(/\s+/g, "");
+  if (smtpPass) {
+    const smtpResult = await sendViaNodemailer(recipientEmail, personalizedSubject, html, plainText);
+    if (smtpResult.success) {
+      return { success: true, provider: "smtp", messageId: smtpResult.messageId };
+    }
+  }
+
+  // Priority 2: Brevo
+  const brevoApiKey = (process.env.BREVO_API_KEY || "").trim();
+  if (brevoApiKey) {
+    try {
+      const fromEmail = (process.env.BREVO_SENDER_EMAIL || process.env.EMAIL_FROM || "sidsuresh7264@gmail.com").trim();
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": brevoApiKey,
+          "Content-Type": "application/json",
+          accept: "application/json",
+        },
+        body: JSON.stringify({
+          sender: { name: "chocii 4 u", email: fromEmail },
+          to: [{ email: recipientEmail, name: recipientName }],
+          subject: personalizedSubject,
+          htmlContent: html,
+          textContent: plainText,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.messageId) {
+        return { success: true, provider: "brevo", messageId: data.messageId };
+      }
+    } catch {}
+  }
+
+  return {
+    success: false,
+    provider: "development",
+    error: "No active email transport available.",
+  };
+}
+

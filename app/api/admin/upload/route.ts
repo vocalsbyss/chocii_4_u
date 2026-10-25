@@ -23,19 +23,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
     // Validate MIME type
-    if (!file.type.startsWith("image/")) {
+    if (!isImage && !isVideo) {
       return NextResponse.json(
-        { error: "Only image files (JPEG, PNG, WEBP, GIF, AVIF) can be uploaded" },
+        { error: "Only image files (JPEG, PNG, WEBP, GIF, AVIF) or video files (MP4, WEBM, MOV) can be uploaded." },
         { status: 400 }
       );
     }
 
-    // Maximum file size: 12MB
-    const MAX_SIZE = 12 * 1024 * 1024;
+    // Maximum file size: 25MB (permits short festive promo reels or video greetings)
+    const MAX_SIZE = 25 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { error: "Image file is too large. Maximum allowed size is 12MB." },
+        { error: "Media file is too large. Maximum allowed size is 25MB." },
         { status: 400 }
       );
     }
@@ -46,17 +49,22 @@ export async function POST(req: NextRequest) {
       if (file.type === "image/png") extension = ".png";
       else if (file.type === "image/webp") extension = ".webp";
       else if (file.type === "image/gif") extension = ".gif";
-      else extension = ".jpg";
+      else if (file.type === "video/mp4") extension = ".mp4";
+      else if (file.type === "video/webm") extension = ".webm";
+      else if (file.type === "video/quicktime") extension = ".mov";
+      else extension = isVideo ? ".mp4" : ".jpg";
     }
 
     // Generate unique safe filename
     const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-    const filename = `dessert-${uniqueSuffix}${extension}`;
+    const prefix = isVideo ? "broadcast-video" : "media";
+    const filename = `${prefix}-${uniqueSuffix}${extension}`;
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const base64Data = buffer.toString("base64");
+
 
     // 1. Try to save locally in public/uploads if writable (local development)
     try {
@@ -110,6 +118,7 @@ export async function POST(req: NextRequest) {
       filename,
       size: file.size,
       type: file.type,
+      mediaType: isVideo ? "video" : "image",
     });
   } catch (error: any) {
     console.error("Admin image upload error:", error);
