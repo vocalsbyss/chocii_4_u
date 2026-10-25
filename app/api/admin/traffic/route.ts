@@ -58,70 +58,6 @@ export async function GET(req: NextRequest) {
     } catch (orderErr) {
       console.warn("Could not query Order records:", orderErr);
     }
-    // If visits table has 0 records on serverless containers, generate realistic Visakhapatnam visitor feed
-    if (visits.length === 0) {
-      const samplePaths = [
-        "/",
-        "/menu",
-        "/menu/dream-cake",
-        "/menu/molten-brownie-bowl",
-        "/menu/choco-churros-dips",
-        "/menu/fruizy-can-cake",
-        "/cart",
-        "/checkout",
-        "/feedback",
-        "/about",
-      ];
-      const sampleDevs = ["mobile", "mobile", "mobile", "desktop", "tablet"];
-      const sampleBrowsers = ["Mobile Safari", "Chrome Mobile", "Chrome", "Safari", "WhatsApp In-App"];
-      const sampleRefs = [
-        "https://api.whatsapp.com/",
-        "https://www.google.com/search?q=chocii+4+u+visakhapatnam",
-        "Direct / Saved Bookmark",
-        "https://instagram.com/chocii4u",
-        "Direct / Saved Bookmark",
-      ];
-
-      for (let i = 0; i < 180; i++) {
-        const hoursAgo = Math.floor(Math.random() * (range === "today" ? 20 : range === "30d" ? 24 * 25 : 24 * 6));
-        const visitTime = new Date(now.getTime() - hoursAgo * 3600 * 1000 - Math.random() * 1800 * 1000);
-        const vid = `v_vsp_${Math.random().toString(36).substring(2, 9)}`;
-        const dev = sampleDevs[Math.floor(Math.random() * sampleDevs.length)];
-        const ref = sampleRefs[Math.floor(Math.random() * sampleRefs.length)];
-        const p = samplePaths[Math.floor(Math.random() * samplePaths.length)];
-        const isOrder = p === "/checkout" && Math.random() > 0.6;
-        const ordNum = isOrder ? `CB-261025-${Math.floor(100 + Math.random() * 900)}` : null;
-
-        visits.push({
-          id: `visit_${i}_${Date.now()}`,
-          visitorId: vid,
-          path: isOrder ? `/order-success/${ordNum}` : p,
-          referrer: ref,
-          device: dev,
-          browser: sampleBrowsers[Math.floor(Math.random() * sampleBrowsers.length)],
-          city: "Visakhapatnam",
-          isCustomer: Math.random() > 0.65,
-          customerId: null,
-          hasOrdered: isOrder,
-          orderNumber: ordNum,
-          createdAt: visitTime,
-        });
-      }
-    }
-
-    if (orders.length === 0) {
-      const convertingVisits = visits.filter((v) => v.hasOrdered);
-      orders = convertingVisits.map((v) => ({
-        id: `ord_${v.id}`,
-        orderNumber: v.orderNumber || "CB-261025-101",
-        total: Math.random() > 0.5 ? 349 : Math.random() > 0.5 ? 598 : 429,
-        createdAt: v.createdAt,
-        customerName: "Visakhapatnam Guest",
-        customerPhone: "8688367177",
-        paymentMethod: Math.random() > 0.4 ? "CASH_ON_DELIVERY" : "RAZORPAY",
-      }));
-    }
-
     // 1. High-Level Metrics
     const uniqueVisitorIds = new Set(visits.map((v) => v.visitorId));
     const uniqueVisitorsCount = uniqueVisitorIds.size;
@@ -321,20 +257,32 @@ export async function GET(req: NextRequest) {
           : 0,
     }));
 
-    // 7. Recent Visitor Feed (Latest 35 visits)
-    const recentVisits = visits.slice(0, 35).map((v) => ({
-      id: v.id,
-      visitorId: v.visitorId,
-      path: v.path,
-      device: v.device,
-      browser: v.browser || "Browser",
-      city: v.city || "Visakhapatnam",
-      referrer: v.referrer || "Direct",
-      isCustomer: v.isCustomer,
-      hasOrdered: v.hasOrdered,
-      orderNumber: v.orderNumber,
-      createdAt: v.createdAt,
-    }));
+    // 7. Recent Visitor Feed (Latest 35 deduplicated visits)
+    const recentVisits: any[] = [];
+    const seenRecent = new Set<string>();
+
+    for (const v of visits) {
+      // Deduplicate visits from the same visitor on the same path within a 5-minute bucket
+      const bucket = Math.floor(new Date(v.createdAt).getTime() / (5 * 60 * 1000));
+      const key = `${v.visitorId}_${v.path}_${bucket}`;
+      if (!seenRecent.has(key)) {
+        seenRecent.add(key);
+        recentVisits.push({
+          id: v.id,
+          visitorId: v.visitorId,
+          path: v.path,
+          device: v.device,
+          browser: v.browser || "Browser",
+          city: v.city || "Visakhapatnam",
+          referrer: v.referrer || "Direct",
+          isCustomer: v.isCustomer,
+          hasOrdered: v.hasOrdered,
+          orderNumber: v.orderNumber,
+          createdAt: v.createdAt,
+        });
+      }
+      if (recentVisits.length >= 35) break;
+    }
 
     return NextResponse.json({
       success: true,
@@ -416,6 +364,44 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({
         success: true,
         message: "Page visit record deleted successfully.",
+      });
+    }
+
+    if (action === "deduplicate") {
+      // Find all duplicate visits: same visitorId, same path, within 5 minutes
+      const allVisits = await prisma.pageVisit.findMany({
+        orderBy: { createdAt: "desc" },
+      });
+
+      const idsToDelete: string[] = [];
+      const seen = new Map<string, number>();
+
+      for (const v of allVisits) {
+        const key = `${v.visitorId}|${v.path}`;
+        const time = new Date(v.createdAt).getTime();
+
+        if (seen.has(key)) {
+          const prevTime = seen.get(key)!;
+          if (Math.abs(prevTime - time) < 5 * 60 * 1000) {
+            idsToDelete.push(v.id);
+            continue;
+          }
+        }
+        seen.set(key, time);
+      }
+
+      let deletedCount = 0;
+      if (idsToDelete.length > 0) {
+        const delRes = await prisma.pageVisit.deleteMany({
+          where: { id: { in: idsToDelete } },
+        });
+        deletedCount = delRes.count;
+      }
+
+      return NextResponse.json({
+        success: true,
+        count: deletedCount,
+        message: `Removed ${deletedCount} duplicate page visits.`,
       });
     }
 

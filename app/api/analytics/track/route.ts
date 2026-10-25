@@ -40,6 +40,19 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Prevent rapid duplicate page visits (e.g. double-click, fast reloads within 30s)
+    const recentDuplicate = await prisma.pageVisit.findFirst({
+      where: {
+        visitorId,
+        path,
+        createdAt: { gte: new Date(Date.now() - 30 * 1000) },
+      },
+    });
+
+    if (recentDuplicate) {
+      return NextResponse.json({ success: true, deduplicated: true, visitorId });
+    }
+
     await prisma.pageVisit.create({
       data: {
         visitorId,

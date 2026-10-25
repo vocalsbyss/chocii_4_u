@@ -151,6 +151,27 @@ export default function AdminTrafficPage() {
     }
   };
 
+  const handleRemoveDuplicates = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/traffic", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deduplicate" }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to remove duplicates");
+      }
+      alert(data.message || `Removed ${data.count || 0} duplicate records.`);
+      fetchTrafficData(range);
+    } catch (e: any) {
+      alert(e.message || "Failed to remove duplicate records");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteVisit = async (visitId: string) => {
     try {
       const res = await fetch(`/api/admin/traffic?id=${visitId}`, {
@@ -239,6 +260,17 @@ export default function AdminTrafficPage() {
               </button>
             ))}
           </div>
+
+          {/* Remove Duplicates Action */}
+          <button
+            onClick={handleRemoveDuplicates}
+            disabled={loading}
+            className="px-3.5 py-2.5 rounded-2xl bg-caramel-500/15 hover:bg-caramel-500/25 border border-caramel-500/30 text-caramel-300 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50"
+            title="Clean duplicate page visits and repeated reloads"
+          >
+            <Filter className="w-3.5 h-3.5" />
+            <span>Remove Duplicates</span>
+          </button>
 
           {/* Clear Traffic Data */}
           <button
@@ -655,29 +687,35 @@ export default function AdminTrafficPage() {
           </div>
 
           <div className="space-y-3">
-            {sources.map((src, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between p-3 rounded-2xl bg-cocoa-950/80 border border-white/10 hover:border-caramel-500/30 transition-all"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="w-6 h-6 rounded-lg bg-caramel-500/15 text-caramel-400 flex items-center justify-center text-xs font-bold">
-                    {i + 1}
-                  </span>
-                  <span className="text-xs font-semibold text-cream-100">
-                    {src.channel}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-bold text-caramel-300">
-                    {src.percentage}%
-                  </span>
-                  <span className="text-[10px] text-cream-300/50 block">
-                    {src.count} views
-                  </span>
-                </div>
+            {sources.length === 0 ? (
+              <div className="py-8 text-center text-cream-300/40 text-xs">
+                No referral traffic recorded in this timeframe.
               </div>
-            ))}
+            ) : (
+              sources.map((src, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-cocoa-950/80 border border-white/10 hover:border-caramel-500/30 transition-all"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-6 h-6 rounded-lg bg-caramel-500/15 text-caramel-400 flex items-center justify-center text-xs font-bold">
+                      {i + 1}
+                    </span>
+                    <span className="text-xs font-semibold text-cream-100">
+                      {src.channel}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-caramel-300">
+                      {src.percentage}%
+                    </span>
+                    <span className="text-[10px] text-cream-300/50 block">
+                      {src.count} views
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -710,22 +748,30 @@ export default function AdminTrafficPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {topPages.map((page, idx) => (
-                <tr key={idx} className="hover:bg-white/5 transition-colors">
-                  <td className="py-3.5 pr-4 font-semibold text-cream-100">
-                    {page.title}
-                  </td>
-                  <td className="py-3.5 pr-4 text-cream-300/60 font-mono text-[11px]">
-                    {page.path}
-                  </td>
-                  <td className="py-3.5 pr-4 text-right font-bold text-cream-100">
-                    {page.views.toLocaleString()}
-                  </td>
-                  <td className="py-3.5 text-right font-bold text-caramel-300">
-                    {page.percentage}%
+              {topPages.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-cream-300/40 text-xs">
+                    No page visit traffic recorded in this timeframe.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                topPages.map((page, idx) => (
+                  <tr key={idx} className="hover:bg-white/5 transition-colors">
+                    <td className="py-3.5 pr-4 font-semibold text-cream-100">
+                      {page.title}
+                    </td>
+                    <td className="py-3.5 pr-4 text-cream-300/60 font-mono text-[11px]">
+                      {page.path}
+                    </td>
+                    <td className="py-3.5 pr-4 text-right font-bold text-cream-100">
+                      {page.views.toLocaleString()}
+                    </td>
+                    <td className="py-3.5 text-right font-bold text-caramel-300">
+                      {page.percentage}%
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
