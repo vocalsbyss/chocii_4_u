@@ -4,9 +4,6 @@ if (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith("file:")) {
 }
 
 const nextConfig = {
-  env: {
-    DATABASE_URL: "file:./dev.db",
-  },
   reactStrictMode: true,
   experimental: {
     outputFileTracingIncludes: {

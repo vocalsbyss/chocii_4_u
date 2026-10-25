@@ -160,3 +160,15 @@ model PageVisit {
   @@index([path])
 }
 
+model UploadedImage {
+  id        String   @id @default(cuid())
+  filename  String   @unique
+  mimeType  String
+  base64    String
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@index([filename])
+}
+
+

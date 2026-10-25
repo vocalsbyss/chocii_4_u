@@ -1,5 +1,5 @@
-if (typeof process !== "undefined" && process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith("file:")) {
-  delete process.env.DATABASE_URL;
+if (typeof process !== "undefined" && process.env["DATABASE_URL"] && !process.env["DATABASE_URL"].startsWith("file:")) {
+  delete process.env["DATABASE_URL"];
 }
 
 import { PrismaClient } from "@prisma/client";
@@ -100,7 +100,9 @@ function resolveDatabaseUrl(): string {
 }
 
 const resolvedUrl = resolveDatabaseUrl();
-process.env.DATABASE_URL = resolvedUrl;
+if (typeof process !== "undefined") {
+  process.env["DATABASE_URL"] = resolvedUrl;
+}
 
 export const prisma =
   global.prisma ||

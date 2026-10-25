@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
 
@@ -48,21 +49,58 @@ export async function POST(req: NextRequest) {
       else extension = ".jpg";
     }
 
-    // Ensure uploads directory exists in public/uploads
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
     // Generate unique safe filename
     const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const filename = `dessert-${uniqueSuffix}${extension}`;
-    const destinationPath = path.join(uploadsDir, filename);
 
-    // Write file buffer
+    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await fs.promises.writeFile(destinationPath, buffer);
+    const base64Data = buffer.toString("base64");
+
+    // 1. Try to save locally in public/uploads if writable (local development)
+    try {
+      const publicUploadsDir = path.join(process.cwd(), "public", "uploads");
+      if (!fs.existsSync(publicUploadsDir)) {
+        fs.mkdirSync(publicUploadsDir, { recursive: true });
+      }
+      const publicDestPath = path.join(publicUploadsDir, filename);
+      await fs.promises.writeFile(publicDestPath, buffer);
+    } catch (_) {
+      // Ignored on read-only serverless filesystems (e.g. Vercel /var/task)
+    }
+
+    // 2. Always save to /tmp/uploads for fast serverless local caching
+    try {
+      const tmpUploadsDir = path.join("/tmp", "uploads");
+      if (!fs.existsSync(tmpUploadsDir)) {
+        fs.mkdirSync(tmpUploadsDir, { recursive: true });
+      }
+      const tmpDestPath = path.join(tmpUploadsDir, filename);
+      await fs.promises.writeFile(tmpDestPath, buffer);
+    } catch (tmpErr) {
+      console.warn("Could not cache upload to /tmp:", tmpErr);
+    }
+
+    // 3. Persist image in database so all serverless instances can serve it
+    try {
+      await prisma.uploadedImage.upsert({
+        where: { filename },
+        create: {
+          filename,
+          mimeType: file.type || "image/jpeg",
+          base64: base64Data,
+          size: file.size,
+        },
+        update: {
+          mimeType: file.type || "image/jpeg",
+          base64: base64Data,
+          size: file.size,
+        },
+      });
+    } catch (dbErr) {
+      console.warn("Could not save uploaded image to database:", dbErr);
+    }
 
     const publicUrl = `/uploads/${filename}`;
 

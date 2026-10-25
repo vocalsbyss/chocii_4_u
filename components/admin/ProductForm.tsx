@@ -528,6 +528,20 @@ export default function ProductForm({
               </div>
             )}
 
+            {/* Direct Image URL input as alternative */}
+            <div className="pt-3 border-t border-white/5 space-y-1.5">
+              <label className="text-[11px] font-semibold text-cream-300/70 block">
+                Or paste direct image link (Unsplash, CDN, etc.):
+              </label>
+              <input
+                type="text"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://images.unsplash.com/photo-..."
+                className="w-full bg-cocoa-950/80 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-cream-100 placeholder:text-cream-300/30 focus:outline-none focus:border-caramel-500 font-mono"
+              />
+            </div>
+
             {uploadError && (
               <div className="p-3 rounded-xl bg-strawberry-500/15 border border-strawberry-500/40 text-strawberry-300 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
