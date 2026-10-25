@@ -31,78 +31,33 @@ interface ReviewItem {
   verified: boolean;
 }
 
-const INITIAL_REVIEWS: ReviewItem[] = [
-  {
-    id: "rev-1",
-    author: "Ananya Sharma",
-    city: "Muralinagar, Visakhapatnam",
-    dessert: "3D Dream Cake",
-    rating: 5,
-    date: "2 days ago",
-    comment:
-      "The Dream Cake is pure joy. Smooth dark chocolate top layer and silky chocolate mousse that just melts in your mouth. Unbelievable decadence!",
-    verified: true,
-  },
-  {
-    id: "rev-2",
-    author: "Rohan Varma",
-    city: "Madhavadhara, Visakhapatnam",
-    dessert: "Brownie Bowl",
-    rating: 5,
-    date: "3 days ago",
-    comment:
-      "Ordered this at 11:30 PM for a midnight craving. Arrived securely packed. The brownie was warm, gooey, and not overly sugary. Perfectly balanced cocoa depth.",
-    verified: true,
-  },
-  {
-    id: "rev-3",
-    author: "Pooja Hegde",
-    city: "MVP Colony, Visakhapatnam",
-    dessert: "Fluted Cinnamon Churros",
-    rating: 5,
-    date: "5 days ago",
-    comment:
-      "The churros arrived delightfully crispy! The warm dark chocolate dip was rich and silky. Will definitely reorder for weekend movie nights.",
-    verified: true,
-  },
-  {
-    id: "rev-4",
-    author: "Vikramaditya S.",
-    city: "Siripuram, Visakhapatnam",
-    dessert: "Layered Pop-Top Can Cake",
-    rating: 5,
-    date: "1 week ago",
-    comment:
-      "Such a cool unboxing concept. Popping the lid releases the rich aroma of espresso and chocolate. My colleagues loved the presentation at the office.",
-    verified: true,
-  },
-  {
-    id: "rev-5",
-    author: "Tanvi Patel",
-    city: "Gajuwaka, Visakhapatnam",
-    dessert: "Tanghulu Ruby Fruit Skewers",
-    rating: 5,
-    date: "1 week ago",
-    comment:
-      "The candied sugar crunch is crisp and sweet! Paired with strawberries and that dark chocolate drizzle, it was pure bliss.",
-    verified: true,
-  },
-  {
-    id: "rev-6",
-    author: "Kabir Mehta",
-    city: "Rushikonda, Visakhapatnam",
-    dessert: "Dream Cake (Balanced Style)",
-    rating: 5,
-    date: "2 weeks ago",
-    comment:
-      "Loved the Balanced Cocoa option. Most chocolate desserts in Visakhapatnam are way too sweet, but chocii 4 u nailed the dark roasted notes with sea salt. World-class.",
-    verified: true,
-  },
-];
-
 export default function FeedbackPage() {
-  const [reviews, setReviews] = useState<ReviewItem[]>(INITIAL_REVIEWS);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Load real customer reviews from localStorage on mount
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem("cravings_customer_reviews");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setReviews(
+            parsed.map((r: any, idx: number) => ({
+              id: r.id || `rev-${idx}-${Date.now()}`,
+              author: r.author || "Guest",
+              city: r.city || "Visakhapatnam",
+              dessert: r.dessert || "Dessert Creation",
+              rating: r.rating || 5,
+              date: r.date || r.createdAt || "Recent",
+              comment: r.comment || r.quote || "",
+              verified: true,
+            }))
+          );
+        }
+      }
+    } catch {}
+  }, []);
 
   // New review form states
   const [name, setName] = useState("");
@@ -127,7 +82,12 @@ export default function FeedbackPage() {
       verified: true,
     };
 
-    setReviews([newRev, ...reviews]);
+    const updated = [newRev, ...reviews];
+    setReviews(updated);
+    try {
+      localStorage.setItem("cravings_customer_reviews", JSON.stringify(updated));
+    } catch {}
+
     setSubmitted(true);
     setName("");
     setCity("");
@@ -163,19 +123,10 @@ export default function FeedbackPage() {
                   Every chocolate creation, warm brownie bowl, and golden fluted churro is prepared to delight. Read genuine reflections from fellow dessert lovers or share your own taste notes.
                 </p>
 
-                {/* Rating Badge Cluster */}
+                {/* Genuine Community Feedback Note */}
                 <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border border-stone-200 shadow-sm">
-                    <div className="flex text-caramel-500">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-caramel-500 text-caramel-500" />
-                      ))}
-                    </div>
-                    <span className="text-sm font-bold text-cocoa-950 font-mono">4.9 / 5.0</span>
-                  </div>
-
                   <div className="text-xs text-cocoa-900/70 font-medium">
-                    Based on <strong>1,200+ verified orders</strong> in Visakhapatnam
+                    Handcrafted daily in Visakhapatnam • Real reviews from our community
                   </div>
                 </div>
               </div>
@@ -212,49 +163,6 @@ export default function FeedbackPage() {
             </div>
           </div>
 
-          {/* Social Proof Metric Highlights on Bright White */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="p-6 rounded-3xl bg-white border border-stone-200 text-center space-y-2 shadow-sm">
-              <span className="text-3xl sm:text-4xl font-serif font-black text-caramel-600 font-mono">
-                4.9★
-              </span>
-              <p className="text-xs uppercase tracking-wider font-bold text-cocoa-950">
-                Average Crave Rating
-              </p>
-              <p className="text-[11px] text-cocoa-800/60">Across all signature desserts</p>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-white border border-stone-200 text-center space-y-2 shadow-sm">
-              <span className="text-3xl sm:text-4xl font-serif font-black text-cocoa-950 font-mono">
-                1,200+
-              </span>
-              <p className="text-xs uppercase tracking-wider font-bold text-cocoa-950">
-                Direct Cloud Orders
-              </p>
-              <p className="text-[11px] text-cocoa-800/60">Prompt local delivery</p>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-white border border-stone-200 text-center space-y-2 shadow-sm">
-              <span className="text-3xl sm:text-4xl font-serif font-black text-caramel-600 font-mono">
-                98.4%
-              </span>
-              <p className="text-xs uppercase tracking-wider font-bold text-cocoa-950">
-                Repeat Crave Rate
-              </p>
-              <p className="text-[11px] text-cocoa-800/60">Customer re-order index</p>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-white border border-stone-200 text-center space-y-2 shadow-sm">
-              <span className="text-3xl sm:text-4xl font-serif font-black text-caramel-600 font-mono">
-                100%
-              </span>
-              <p className="text-xs uppercase tracking-wider font-bold text-cocoa-950">
-                Dedicated Kitchen
-              </p>
-              <p className="text-[11px] text-cocoa-800/60">Selected cocoa & fresh ingredients</p>
-            </div>
-          </div>
-
           {/* Form and Customer Reviews Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             {/* Left: Customer Reviews Grid */}
@@ -262,62 +170,76 @@ export default function FeedbackPage() {
               <div className="flex items-center justify-between pb-2">
                 <div>
                   <span className="text-xs uppercase tracking-widest text-caramel-600 dark:text-caramel-400 font-bold">
-                    Community Praise
+                    Community Reflections
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-serif font-black text-cocoa-950 dark:text-cream-100 mt-1">
-                    Verified Customer Reviews
+                    Customer Reviews
                   </h2>
                 </div>
-                <span className="text-xs font-mono font-bold bg-white dark:bg-cocoa-900 px-3 py-1.5 rounded-full border border-stone-200 dark:border-white/10 text-cocoa-950 dark:text-cream-200 shadow-sm">
-                  {reviews.length} Reflections
-                </span>
+                {reviews.length > 0 && (
+                  <span className="text-xs font-mono font-bold bg-white dark:bg-cocoa-900 px-3 py-1.5 rounded-full border border-stone-200 dark:border-white/10 text-cocoa-950 dark:text-cream-200 shadow-sm">
+                    {reviews.length} {reviews.length === 1 ? "Review" : "Reviews"}
+                  </span>
+                )}
               </div>
 
               <div className="space-y-4">
-                {reviews.map((rev) => (
-                  <div
-                    key={rev.id}
-                    className="p-6 sm:p-7 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow space-y-4"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-bold text-cocoa-950 dark:text-cream-100">{rev.author}</h4>
-                          {rev.verified && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                              Verified Order
-                            </span>
-                          )}
+                {reviews.length > 0 ? (
+                  reviews.map((rev) => (
+                    <div
+                      key={rev.id}
+                      className="p-6 sm:p-7 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow space-y-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-bold text-cocoa-950 dark:text-cream-100">{rev.author}</h4>
+                            {rev.verified && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                Verified Guest
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-cocoa-800/60 dark:text-cream-300/70">{rev.city}</p>
                         </div>
-                        <p className="text-xs text-cocoa-800/60 dark:text-cream-300/70">{rev.city}</p>
+
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="flex text-caramel-500">
+                            {[...Array(rev.rating)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className="w-3.5 h-3.5 fill-caramel-500 text-caramel-500"
+                              />
+                            ))}
+                          </div>
+                          <span className="text-[10px] text-cocoa-950/40 dark:text-cream-300/40">{rev.date}</span>
+                        </div>
                       </div>
 
-                      <div className="flex flex-col items-end gap-1">
-                        <div className="flex text-caramel-500">
-                          {[...Array(rev.rating)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className="w-3.5 h-3.5 fill-caramel-500 text-caramel-500"
-                            />
-                          ))}
-                        </div>
-                        <span className="text-[10px] text-cocoa-950/40 dark:text-cream-300/40">{rev.date}</span>
+                      <p className="text-xs sm:text-sm text-cocoa-900 dark:text-cream-100 leading-relaxed font-normal">
+                        &ldquo;{rev.comment}&rdquo;
+                      </p>
+
+                      <div className="border-t border-stone-100 dark:border-white/10 pt-3 flex items-center justify-between">
+                        <span className="text-[11px] font-mono text-caramel-700 dark:text-caramel-400 font-bold uppercase">
+                          {rev.dessert}
+                        </span>
+                        <span className="text-[10px] text-cocoa-950/40 dark:text-cream-300/40">Visakhapatnam Kitchen</span>
                       </div>
                     </div>
-
-                    <p className="text-xs sm:text-sm text-cocoa-900 dark:text-cream-100 leading-relaxed font-normal">
-                      &ldquo;{rev.comment}&rdquo;
+                  ))
+                ) : (
+                  <div className="p-12 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 text-center space-y-3 shadow-sm">
+                    <MessageSquare className="w-10 h-10 text-caramel-500/60 mx-auto" />
+                    <h3 className="text-base font-bold text-cocoa-950 dark:text-cream-100">
+                      No Customer Reviews Yet
+                    </h3>
+                    <p className="text-xs text-cocoa-900/60 dark:text-cream-300/60 max-w-sm mx-auto leading-relaxed">
+                      Be the first to share your thoughts on our desserts! Fill out the review form to post your feedback.
                     </p>
-
-                    <div className="border-t border-stone-100 dark:border-white/10 pt-3 flex items-center justify-between">
-                      <span className="text-[11px] font-mono text-caramel-700 dark:text-caramel-400 font-bold uppercase">
-                        {rev.dessert}
-                      </span>
-                      <span className="text-[10px] text-cocoa-950/40 dark:text-cream-300/40">Visakhapatnam Kitchen Dispatch</span>
-                    </div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 

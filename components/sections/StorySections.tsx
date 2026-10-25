@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,6 +19,14 @@ import {
 } from "lucide-react";
 import FloatingChocolateCanvas from "../3d/FloatingChocolateCanvas";
 import { Product } from "@/types";
+
+interface CustomerReviewItem {
+  quote: string;
+  author: string;
+  city?: string;
+  rating: number;
+  dessert?: string;
+}
 
 interface StorySectionsProps {
   products: Product[];
@@ -70,34 +78,6 @@ const CRAVING_MOODS = [
   },
 ];
 
-// Customer Testimonials
-const TESTIMONIALS = [
-  {
-    quote:
-      "The Dream Cake is pure joy. Rich chocolate layers and smooth texture make it a standout dessert.",
-    author: "Ananya Iyer",
-    city: "Muralinagar, Visakhapatnam",
-    rating: 5,
-    dessert: "Dream Cake (Balanced)",
-  },
-  {
-    quote:
-      "Arrived neatly packed and on time. The cinnamon churros were delightfully crispy and the dark chocolate dip is wonderful.",
-    author: "Kabir Mehta",
-    city: "Madhavadhara, Visakhapatnam",
-    rating: 5,
-    dessert: "Choco Churros & Dipping Duo",
-  },
-  {
-    quote:
-      "Finally a dessert brand that gives you the option of Balanced cocoa! Rich cocoa flavor without being overly sweet. Our whole office orders on Fridays.",
-    author: "Siddharth Rao",
-    city: "MVP Colony, Visakhapatnam",
-    rating: 5,
-    dessert: "Dream Bowl Lava",
-  },
-];
-
 // Homepage FAQ Accordion Data
 const FAQS = [
   {
@@ -130,6 +110,21 @@ export default function StorySections({
   const [activeMoodId, setActiveMoodId] = useState("dream-cake");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [activeCustomization, setActiveCustomization] = useState<"CLASSIC" | "BALANCED">("CLASSIC");
+  const [customerReviews, setCustomerReviews] = useState<CustomerReviewItem[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("cravings_customer_reviews");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setCustomerReviews(parsed);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const signatureProduct =
     products.find((p) => p.slug === "dream-cake") || products[0];
@@ -475,17 +470,14 @@ export default function StorySections({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3 max-w-2xl mx-auto">
             <span className="text-xs uppercase tracking-[0.25em] text-caramel-600 dark:text-caramel-400 font-bold">
-              Loved By 1,200+ Dessert Enthusiasts
+              Guest Experiences & Reviews
             </span>
             <h2 className="text-3xl sm:text-4xl font-serif font-black text-cocoa-950 dark:text-cream-100">
               The Word On The Street
             </h2>
-            <div className="flex items-center justify-center gap-1 text-caramel-500 pt-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-caramel-500 text-caramel-500" />
-              ))}
-              <span className="text-xs font-mono font-bold text-cocoa-950 dark:text-cream-200 ml-2">4.9 / 5.0 Rating</span>
-            </div>
+            <p className="text-xs sm:text-sm text-cocoa-900/70 dark:text-cream-200/70 max-w-md mx-auto">
+              Real thoughts from our dessert patrons. Share your feedback after enjoying your sweet treat!
+            </p>
           </div>
 
           {/* 3D Customer Loved Chocolate Atelier */}
@@ -497,7 +489,7 @@ export default function StorySections({
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-serif font-black text-cocoa-950 dark:text-cream-100 leading-tight">
                   Crafted to Crave. <br />
-                  Celebrated by Thousands.
+                  Celebrated Daily.
                 </h3>
                 <p className="text-xs sm:text-sm text-cocoa-900/80 dark:text-cream-200/80 leading-relaxed font-normal">
                   Watch rich chocolate ribbons and crisp chocolate pieces swirl in real-time. Every dessert is designed to satisfy your cravings.
@@ -523,41 +515,46 @@ export default function StorySections({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {TESTIMONIALS.map((t, idx) => (
-              <div
-                key={idx}
-                className="p-8 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 space-y-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="space-y-4">
-                  <div className="flex gap-1 text-caramel-500">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-caramel-500 text-caramel-500" />
-                    ))}
+          {/* Real Customer Reviews Grid (Only rendered if genuine reviews are saved) */}
+          {customerReviews.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {customerReviews.slice(0, 3).map((t, idx) => (
+                <div
+                  key={idx}
+                  className="p-8 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 space-y-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="space-y-4">
+                    <div className="flex gap-1 text-caramel-500">
+                      {[...Array(t.rating)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-caramel-500 text-caramel-500" />
+                      ))}
+                    </div>
+                    <p className="text-xs sm:text-sm text-cocoa-900/90 dark:text-cream-100 italic font-normal leading-relaxed">
+                      &ldquo;{t.quote}&rdquo;
+                    </p>
                   </div>
-                  <p className="text-xs sm:text-sm text-cocoa-900/90 dark:text-cream-100 italic font-normal leading-relaxed">
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                </div>
-                <div className="border-t border-stone-200/60 dark:border-white/10 pt-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-cocoa-950 dark:text-cream-100">{t.author}</p>
-                    <p className="text-[11px] text-cocoa-800/60 dark:text-cream-300/70">{t.city}</p>
+                  <div className="border-t border-stone-200/60 dark:border-white/10 pt-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-cocoa-950 dark:text-cream-100">{t.author}</p>
+                      {t.city && <p className="text-[11px] text-cocoa-800/60 dark:text-cream-300/70">{t.city}</p>}
+                    </div>
+                    {t.dessert && (
+                      <span className="text-[10px] font-mono text-caramel-600 dark:text-caramel-400 font-bold uppercase">
+                        {t.dessert}
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[10px] font-mono text-caramel-600 dark:text-caramel-400 font-bold uppercase">
-                    {t.dessert}
-                  </span>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="text-center pt-2">
             <Link
               href="/feedback"
               className="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-caramel-700 dark:text-caramel-400 hover:text-caramel-800 dark:hover:text-caramel-300 underline underline-offset-8 transition-colors"
             >
-              Read All Verified Customer Reviews & Submit Your Own Feedback
+              Share Your Thoughts & Submit Feedback
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

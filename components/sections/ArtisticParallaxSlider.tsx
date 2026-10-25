@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -26,32 +26,13 @@ interface ArtisticParallaxSliderProps {
   menuSectionRef?: React.RefObject<HTMLDivElement>;
 }
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "The Dream Cake is pure joy. Rich chocolate layers and smooth texture make it a standout dessert in Visakhapatnam.",
-    author: "Ananya R.",
-    city: "Muralinagar",
-    rating: 5,
-    dessert: "Dream Cake",
-  },
-  {
-    quote:
-      "The Dream Bowl was incredible. Rich warm brownie base with contrasting toppings delivered in perfect condition.",
-    author: "Rohit S.",
-    city: "Madhavadhara",
-    rating: 5,
-    dessert: "Dream Bowl",
-  },
-  {
-    quote:
-      "The churros arrived warm and crispy, and the dual fondue dips were exceptional. Perfect late-night craving.",
-    author: "Priya M.",
-    city: "MVP Colony",
-    rating: 5,
-    dessert: "Choco Churros",
-  },
-];
+interface CustomerReview {
+  author: string;
+  city?: string;
+  rating: number;
+  dessert?: string;
+  quote: string;
+}
 
 export default function ArtisticParallaxSlider({
   onExploreClick,
@@ -70,6 +51,19 @@ export default function ArtisticParallaxSlider({
   const [reviewDessert, setReviewDessert] = useState("Dream Cake");
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [customerReviews, setCustomerReviews] = useState<CustomerReview[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("cravings_customer_reviews");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setCustomerReviews(parsed);
+        }
+      }
+    } catch {}
+  }, []);
 
   // Find products for direct action buttons
   const dreamCake = products.find((p) => p.slug === "dream-cake") || products[0];
@@ -118,6 +112,21 @@ export default function ArtisticParallaxSlider({
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewName || !reviewComment) return;
+
+    const newRev: CustomerReview = {
+      author: reviewName.trim(),
+      city: "Visakhapatnam",
+      rating: reviewRating,
+      dessert: reviewDessert,
+      quote: reviewComment.trim(),
+    };
+
+    const updated = [newRev, ...customerReviews];
+    setCustomerReviews(updated);
+    try {
+      localStorage.setItem("cravings_customer_reviews", JSON.stringify(updated));
+    } catch {}
+
     setReviewSubmitted(true);
     setTimeout(() => {
       setReviewSubmitted(false);
@@ -391,59 +400,53 @@ export default function ArtisticParallaxSlider({
             <div className="inline-flex items-center gap-2 max-w-full">
               <span className="w-2.5 h-2.5 rounded-full bg-caramel-500 animate-ping shrink-0" />
               <span className="text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-[0.25em] text-caramel-700 dark:text-caramel-400 font-black bg-white dark:bg-cocoa-900 px-3 sm:px-3.5 py-1.5 rounded-full border border-stone-200 dark:border-white/10 shadow-sm font-mono max-w-[88vw] truncate">
-                CHOCII 4 U • SENSORY FEEDBACK & REVIEWS
+                CHOCII 4 U • CUSTOMER FEEDBACK
               </span>
             </div>
             <h2 className="text-2xl sm:text-5xl lg:text-6xl font-black font-sans uppercase tracking-tight text-cocoa-950 dark:text-cream-100 leading-[0.95] break-words">
-              <span className="block">SENSORY REVIEWS &</span>
+              <span className="block">SHARE YOUR</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cocoa-950 via-caramel-600 to-caramel-500 dark:from-cream-100 dark:via-caramel-400 dark:to-caramel-300 italic font-serif lowercase">
-                customer love
+                sweet experience
               </span>
             </h2>
-            <div className="flex flex-wrap items-center justify-center gap-1.5 text-caramel-500">
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-caramel-500 text-caramel-500" />
-                ))}
-              </div>
-              <span className="text-xs font-mono font-bold text-cocoa-950 dark:text-cream-200 ml-1 sm:ml-2">
-                4.9 / 5.0 Rating • 2,400+ Verified Orders
-              </span>
-            </div>
-            <p className="text-sm text-cocoa-900/80 dark:text-cream-200/80 font-normal leading-relaxed">
-              Real reviews from dessert enthusiasts across Visakhapatnam. Tell us how your sweet craving was satisfied!
+            <p className="text-sm text-cocoa-900/80 dark:text-cream-200/80 font-normal leading-relaxed max-w-xl mx-auto">
+              We craft each dessert fresh daily with genuine passion. Tell us how your sweet craving was satisfied!
             </p>
           </div>
 
-          {/* Testimonial Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, idx) => (
-              <div
-                key={idx}
-                className="p-7 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 space-y-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="space-y-3">
-                  <div className="flex gap-1 text-caramel-500">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-caramel-500 text-caramel-500" />
-                    ))}
+          {/* Real Customer Reviews Grid (Only shown when genuine reviews are submitted) */}
+          {customerReviews.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {customerReviews.slice(0, 6).map((t, idx) => (
+                <div
+                  key={idx}
+                  className="p-7 rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 space-y-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="space-y-3">
+                    <div className="flex gap-1 text-caramel-500">
+                      {[...Array(t.rating)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-caramel-500 text-caramel-500" />
+                      ))}
+                    </div>
+                    <p className="text-xs sm:text-sm text-cocoa-900/90 dark:text-cream-100 italic font-normal leading-relaxed">
+                      &ldquo;{t.quote}&rdquo;
+                    </p>
                   </div>
-                  <p className="text-xs sm:text-sm text-cocoa-900/90 dark:text-cream-100 italic font-normal leading-relaxed">
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                </div>
-                <div className="border-t border-stone-200/60 dark:border-white/10 pt-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-cocoa-950 dark:text-cream-100">{t.author}</p>
-                    <p className="text-[11px] text-cocoa-800/60 dark:text-cream-300/70">{t.city}</p>
+                  <div className="border-t border-stone-200/60 dark:border-white/10 pt-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-cocoa-950 dark:text-cream-100">{t.author}</p>
+                      {t.city && <p className="text-[11px] text-cocoa-800/60 dark:text-cream-300/70">{t.city}</p>}
+                    </div>
+                    {t.dessert && (
+                      <span className="text-[10px] font-mono text-caramel-700 dark:text-caramel-400 font-bold uppercase bg-stone-100 dark:bg-white/10 px-2 py-0.5 rounded">
+                        {t.dessert}
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[10px] font-mono text-caramel-700 dark:text-caramel-400 font-bold uppercase bg-stone-100 dark:bg-white/10 px-2 py-0.5 rounded">
-                    {t.dessert}
-                  </span>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Quick Review Submission Box */}
           <div className="max-w-2xl mx-auto rounded-3xl bg-white dark:bg-cocoa-900 border border-stone-200 dark:border-white/10 p-6 sm:p-8 shadow-sm">
