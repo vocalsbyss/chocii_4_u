@@ -9,8 +9,7 @@
  *  4. Console fallback for instant dev/preview
  */
 
-import tls from "tls";
-import net from "net";
+import nodemailer from "nodemailer";
 
 export interface SendEmailResult {
   success: boolean;
@@ -187,119 +186,74 @@ export function generateOtpHtmlEmail({
 </html>`;
 }
 
+
 /**
- * Sends email using raw SMTP over TLS (e.g. Gmail port 465)
+ * Sends email using Nodemailer (e.g. Gmail App Password, Hostinger, standard SMTP)
+ * 100% Free with Gmail: sends up to 500 emails/day to ANY recipient without domain verification.
  */
-async function sendViaSmtp(
+async function sendViaNodemailer(
   toEmail: string,
   subject: string,
   htmlContent: string,
   plainText: string
-): Promise<boolean> {
-  const host = process.env.SMTP_HOST || "smtp.gmail.com";
-  const port = parseInt(process.env.SMTP_PORT || "465", 10);
-  const user = process.env.SMTP_USER;
-  const pass = (process.env.SMTP_PASS || "").replace(/\s+/g, "");
-  const from = process.env.SMTP_FROM || `chocii 4 u <${user}>`;
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const user = (process.env.GMAIL_USER || process.env.SMTP_USER || "sidsuresh7264@gmail.com").trim();
+  const pass = (process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || "").replace(/\s+/g, "");
 
-  if (!user || !pass) return false;
-
-  return new Promise((resolve) => {
-    let socket: tls.TLSSocket | net.Socket;
-
-    const timeout = setTimeout(() => {
-      try {
-        socket.destroy();
-      } catch {}
-      console.warn("[SMTP] Socket timeout after 5s");
-      resolve(false);
-    }, 5000);
-
-    const onConnect = () => {
-      let stage = 0;
-      let buffer = "";
-
-      const sendCommand = (cmd: string) => {
-        socket.write(cmd + "\r\n");
-      };
-
-      socket.on("data", (chunk) => {
-        buffer += chunk.toString();
-        const lines = buffer.split("\r\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (!line) continue;
-          const code = parseInt(line.substring(0, 3), 10);
-
-          if (stage === 0 && code === 220) {
-            stage = 1;
-            sendCommand(`EHLO chocii4u.com`);
-          } else if (stage === 1 && code === 250) {
-            stage = 2;
-            sendCommand(`AUTH LOGIN`);
-          } else if (stage === 2 && code === 334) {
-            stage = 3;
-            sendCommand(Buffer.from(user).toString("base64"));
-          } else if (stage === 3 && code === 334) {
-            stage = 4;
-            sendCommand(Buffer.from(pass).toString("base64"));
-          } else if (stage === 4 && code === 235) {
-            stage = 5;
-            sendCommand(`MAIL FROM:<${user}>`);
-          } else if (stage === 5 && code === 250) {
-            stage = 6;
-            sendCommand(`RCPT TO:<${toEmail}>`);
-          } else if (stage === 6 && code === 250) {
-            stage = 7;
-            sendCommand(`DATA`);
-          } else if (stage === 7 && code === 354) {
-            stage = 8;
-            const message = [
-              `From: ${from}`,
-              `To: <${toEmail}>`,
-              `Subject: ${subject}`,
-              `MIME-Version: 1.0`,
-              `Content-Type: text/html; charset=UTF-8`,
-              ``,
-              htmlContent,
-              `.`,
-            ].join("\r\n");
-            sendCommand(message);
-          } else if (stage === 8 && code === 250) {
-            stage = 9;
-            sendCommand(`QUIT`);
-            clearTimeout(timeout);
-            socket.end();
-            resolve(true);
-            return;
-          } else if (code >= 400) {
-            console.warn(`[SMTP] Error at stage ${stage}:`, line);
-            clearTimeout(timeout);
-            socket.destroy();
-            resolve(false);
-            return;
-          }
-        }
-      });
+  if (!pass) {
+    return {
+      success: false,
+      error: "No Gmail App Password / SMTP password configured.",
     };
+  }
 
-    if (port === 465) {
-      socket = tls.connect({ host, port, rejectUnauthorized: false }, onConnect);
-    } else {
-      socket = net.connect({ host, port }, onConnect);
-    }
+  const host = (process.env.SMTP_HOST || "smtp.gmail.com").trim();
+  const port = parseInt(process.env.SMTP_PORT || "465", 10);
+  const secure = port === 465;
 
-    socket.on("error", (err) => {
-      clearTimeout(timeout);
-      console.warn("[SMTP] Connection error:", err.message);
-      resolve(false);
+  try {
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: { user, pass },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 6000,
     });
-  });
+
+    const from = process.env.SMTP_FROM || `"chocii 4 u" <${user}>`;
+
+    const info = await transporter.sendMail({
+      from,
+      to: toEmail,
+      subject,
+      text: plainText,
+      html: htmlContent,
+    });
+
+    console.log(`[Nodemailer / Gmail] Successfully sent OTP email to ${toEmail}. Message ID: ${info.messageId}`);
+    return {
+      success: true,
+      messageId: info.messageId,
+    };
+  } catch (err: any) {
+    console.error("[Nodemailer / Gmail] Delivery error:", err);
+    return {
+      success: false,
+      error: err?.message || "SMTP error",
+    };
+  }
 }
 
 /**
- * Dispatch verification OTP to customer's email
+ * Dispatch verification OTP to customer's email using free email senders
+ * Priority:
+ *  1. Free Gmail SMTP via Nodemailer (100% free, sends to ANY recipient, no domain required)
+ *  2. Brevo API (Free tier: 300 emails/day, no custom domain required)
+ *  3. Resend API (if configured)
  */
 export async function sendOtpEmail({
   toEmail,
@@ -318,16 +272,50 @@ export async function sendOtpEmail({
 
   let lastError: string | undefined;
 
-  // 1. Try Resend if configured (with default provisioned key fallback)
-  const defaultResendKey = Buffer.from(
-    "cmVfQjcyVzJFM05fOFJCZ3BHOEdSQ2RCY1NSR2s3WnZyYm94",
-    "base64"
-  ).toString("utf-8");
-  const resendApiKey = (process.env.RESEND_API_KEY || defaultResendKey).trim();
+  // 1. Priority 1: Free Gmail / Standard SMTP (sends to ANY email, zero custom domain needed)
+  const smtpPass = (process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || "").replace(/\s+/g, "");
+  if (smtpPass) {
+    const smtpResult = await sendViaNodemailer(toEmail, subject, html, plainText);
+    if (smtpResult.success) {
+      return { success: true, provider: "smtp", messageId: smtpResult.messageId };
+    }
+    lastError = smtpResult.error;
+  }
 
+  // 2. Priority 2: Brevo API (Free tier: 300 emails/day, no custom domain required)
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const fromEmail = process.env.SMTP_USER || "sidsuresh7264@gmail.com";
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: { name: "chocii 4 u", email: fromEmail },
+          to: [{ email: toEmail, name: customerName }],
+          subject,
+          htmlContent: html,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (res.ok) {
+        return { success: true, provider: "brevo", messageId: data?.messageId };
+      }
+      console.warn("[Brevo] Email dispatch response:", res.status, data);
+      if (data?.message) lastError = data.message;
+    } catch (err: any) {
+      console.error("[Brevo] Error:", err);
+      lastError = err?.message;
+    }
+  }
+
+  // 3. Priority 3: Resend API (only if explicitly set in RESEND_API_KEY)
+  const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
   if (resendApiKey) {
     try {
-      // Free Resend accounts can only send from onboarding@resend.dev unless custom domain is verified
       let from = (process.env.EMAIL_FROM || "").trim();
       if (!from || from.includes("@gmail.com") || from.includes("@yahoo.com") || from.includes("@outlook.com")) {
         from = "chocii 4 u <onboarding@resend.dev>";
@@ -363,45 +351,6 @@ export async function sendOtpEmail({
     }
   }
 
-  // 2. Try Brevo if configured
-  if (process.env.BREVO_API_KEY) {
-    try {
-      const fromEmail = process.env.SMTP_USER || "sidsuresh7264@gmail.com";
-      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-        method: "POST",
-        headers: {
-          "api-key": process.env.BREVO_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sender: { name: "chocii 4 u", email: fromEmail },
-          to: [{ email: toEmail, name: customerName }],
-          subject,
-          htmlContent: html,
-        }),
-      });
-
-      const data = await res.json().catch(() => null);
-      if (res.ok) {
-        return { success: true, provider: "brevo", messageId: data?.messageId };
-      }
-      console.warn("[Brevo] Email dispatch response:", res.status, data);
-      if (data?.message) lastError = data.message;
-    } catch (err: any) {
-      console.error("[Brevo] Error:", err);
-      lastError = err?.message;
-    }
-  }
-
-  // 3. Try standard SMTP (e.g. Gmail with App Password)
-  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-    const smtpSuccess = await sendViaSmtp(toEmail, subject, html, plainText);
-    if (smtpSuccess) {
-      return { success: true, provider: "smtp" };
-    }
-    lastError = "SMTP connection could not deliver message";
-  }
-
   // 4. Log to server console for tracking
   console.log(
     `\n======================================================\n[CHOCII 4 U EMAIL OTP DISPATCH]\nRecipient Email : ${toEmail}\nCustomer Name   : ${customerName}\nMobile Phone    : ${phone || "N/A"}\nVerification Code: ${code}\nSubject         : ${subject}\nLast Error      : ${lastError || "None"}\n======================================================\n`
@@ -410,6 +359,8 @@ export async function sendOtpEmail({
   return {
     success: false,
     provider: "development",
-    error: lastError || "Failed to deliver email. Please check your email address.",
+    error:
+      lastError ||
+      "Free email sender is not yet configured. Please add your free Gmail App Password (GMAIL_APP_PASSWORD) or Brevo key in Vercel settings, or enter test code 123456.",
   };
 }

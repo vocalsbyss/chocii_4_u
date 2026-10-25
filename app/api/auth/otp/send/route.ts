@@ -139,22 +139,11 @@ export async function POST(req: NextRequest) {
     }
 
     if (!emailResult.success) {
-      const errMsg = emailResult.error || "";
-      if (errMsg.includes("only send testing emails to your own email address") || errMsg.includes("testing emails to your own email")) {
-        return NextResponse.json(
-          {
-            error:
-              "Resend Sandbox Mode: Can only send to your account email (sidsuresh7264@gmail.com). Please enter sidsuresh7264@gmail.com, or verify your domain at resend.com/domains to email any customer.",
-          },
-          { status: 400 }
-        );
-      }
-
       return NextResponse.json(
         {
           error:
             emailResult.error ||
-            "Unable to dispatch verification code to this email. Please verify your address and try again.",
+            "Unable to dispatch verification code to this email. Please check your email configuration and try again.",
         },
         { status: 400 }
       );
