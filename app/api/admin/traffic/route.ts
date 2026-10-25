@@ -28,13 +28,21 @@ export async function GET(req: NextRequest) {
       startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     }
 
-    // Query Page Visits and Orders in this range
-    const [visits, orders] = await Promise.all([
-      prisma.pageVisit.findMany({
+    // Query Page Visits and Orders in this range safely
+    let visits: any[] = [];
+    let orders: any[] = [];
+
+    try {
+      visits = await prisma.pageVisit.findMany({
         where: { createdAt: { gte: startDate } },
         orderBy: { createdAt: "desc" },
-      }),
-      prisma.order.findMany({
+      });
+    } catch (visitErr) {
+      console.warn("Could not query PageVisit records:", visitErr);
+    }
+
+    try {
+      orders = await prisma.order.findMany({
         where: { createdAt: { gte: startDate } },
         select: {
           id: true,
@@ -46,8 +54,10 @@ export async function GET(req: NextRequest) {
           paymentMethod: true,
         },
         orderBy: { createdAt: "desc" },
-      }),
-    ]);
+      });
+    } catch (orderErr) {
+      console.warn("Could not query Order records:", orderErr);
+    }
 
     // 1. High-Level Metrics
     const uniqueVisitorIds = new Set(visits.map((v) => v.visitorId));
@@ -286,17 +296,32 @@ export async function GET(req: NextRequest) {
     console.warn("Admin traffic analytics error, returning default empty metrics:", error);
     return NextResponse.json({
       success: true,
+      range: "7d",
       metrics: {
-        totalVisitors: 0,
+        uniqueVisitors: 0,
         totalPageViews: 0,
         totalOrders: 0,
         totalRevenue: 0,
         conversionRate: 0,
         avgOrderValue: 0,
-        avgPagesPerVisitor: 1,
+        avgPagesPerVisitor: 0,
       },
-      funnel: { visits: 0, menuViews: 0, checkouts: 0, orders: 0 },
-      devices: [],
+      funnel: {
+        totalVisitors: 0,
+        viewedMenu: 0,
+        viewedCart: 0,
+        reachedCheckout: 0,
+        completedOrders: 0,
+        menuConversionRate: 0,
+        cartConversionRate: 0,
+        checkoutConversionRate: 0,
+        orderConversionRate: 0,
+      },
+      devices: {
+        mobile: { count: 0, percentage: 0 },
+        desktop: { count: 0, percentage: 0 },
+        tablet: { count: 0, percentage: 0 },
+      },
       topPages: [],
       sources: [],
       trends: [],

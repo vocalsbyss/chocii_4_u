@@ -178,15 +178,15 @@ export default function AdminTrafficPage() {
     return () => clearInterval(interval);
   }, [range, autoRefresh]);
 
-  const filteredVisits = recentVisits.filter((v) => {
+  const filteredVisits = (recentVisits || []).filter((v) => {
+    if (!v) return false;
     if (!searchFilter.trim()) return true;
     const term = searchFilter.toLowerCase();
-    return (
-      v.path.toLowerCase().includes(term) ||
-      v.device.toLowerCase().includes(term) ||
-      (v.orderNumber && v.orderNumber.toLowerCase().includes(term)) ||
-      v.visitorId.toLowerCase().includes(term)
-    );
+    const p = (v.path || "").toLowerCase();
+    const d = (v.device || "").toLowerCase();
+    const o = (v.orderNumber || "").toLowerCase();
+    const id = (v.visitorId || "").toLowerCase();
+    return p.includes(term) || d.includes(term) || o.includes(term) || id.includes(term);
   });
 
   return (
@@ -388,7 +388,7 @@ export default function AdminTrafficPage() {
               <div>
                 <p className="text-xs text-cream-300/70 font-medium">Store Visitors</p>
                 <p className="text-xl sm:text-2xl font-serif font-black text-cream-100 mt-1">
-                  {funnel.totalVisitors}
+                  {funnel?.totalVisitors ?? 0}
                 </p>
               </div>
               <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
@@ -404,19 +404,19 @@ export default function AdminTrafficPage() {
                   Step 2
                 </span>
                 <span className="text-[11px] font-bold text-cream-100">
-                  {funnel.menuConversionRate}%
+                  {funnel?.menuConversionRate ?? 0}%
                 </span>
               </div>
               <div>
                 <p className="text-xs text-cream-300/70 font-medium">Explored Menu</p>
                 <p className="text-xl sm:text-2xl font-serif font-black text-cream-100 mt-1">
-                  {funnel.viewedMenu}
+                  {funnel?.viewedMenu ?? 0}
                 </p>
               </div>
               <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-caramel-500 h-full rounded-full"
-                  style={{ width: `${Math.min(100, funnel.menuConversionRate)}%` }}
+                  style={{ width: `${Math.min(100, funnel?.menuConversionRate ?? 0)}%` }}
                 />
               </div>
               <p className="text-[10px] text-cream-300/50">Browsed desserts & 3D cakes</p>
@@ -429,19 +429,19 @@ export default function AdminTrafficPage() {
                   Step 3
                 </span>
                 <span className="text-[11px] font-bold text-cream-100">
-                  {funnel.cartConversionRate}%
+                  {funnel?.cartConversionRate ?? 0}%
                 </span>
               </div>
               <div>
                 <p className="text-xs text-cream-300/70 font-medium">Added to Cart</p>
                 <p className="text-xl sm:text-2xl font-serif font-black text-cream-100 mt-1">
-                  {funnel.viewedCart}
+                  {funnel?.viewedCart ?? 0}
                 </p>
               </div>
               <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-caramel-500 h-full rounded-full"
-                  style={{ width: `${Math.min(100, funnel.cartConversionRate)}%` }}
+                  style={{ width: `${Math.min(100, funnel?.cartConversionRate ?? 0)}%` }}
                 />
               </div>
               <p className="text-[10px] text-cream-300/50">Selected items & add-ons</p>
@@ -454,19 +454,19 @@ export default function AdminTrafficPage() {
                   Step 4
                 </span>
                 <span className="text-[11px] font-bold text-cream-100">
-                  {funnel.checkoutConversionRate}%
+                  {funnel?.checkoutConversionRate ?? 0}%
                 </span>
               </div>
               <div>
                 <p className="text-xs text-cream-300/70 font-medium">Entered Checkout</p>
                 <p className="text-xl sm:text-2xl font-serif font-black text-cream-100 mt-1">
-                  {funnel.reachedCheckout}
+                  {funnel?.reachedCheckout ?? 0}
                 </p>
               </div>
               <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-caramel-500 h-full rounded-full"
-                  style={{ width: `${Math.min(100, funnel.checkoutConversionRate)}%` }}
+                  style={{ width: `${Math.min(100, funnel?.checkoutConversionRate ?? 0)}%` }}
                 />
               </div>
               <p className="text-[10px] text-cream-300/50">Filled address & payment method</p>
@@ -480,13 +480,13 @@ export default function AdminTrafficPage() {
                   Step 5
                 </span>
                 <span className="text-[11px] font-bold text-caramel-300">
-                  {metrics?.conversionRate}%
+                  {metrics?.conversionRate ?? 0}%
                 </span>
               </div>
               <div>
                 <p className="text-xs text-caramel-200 font-semibold">Orders Completed</p>
                 <p className="text-xl sm:text-2xl font-serif font-black text-cream-100 mt-1">
-                  {funnel.completedOrders}
+                  {funnel?.completedOrders ?? 0}
                 </p>
               </div>
               <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
@@ -578,7 +578,7 @@ export default function AdminTrafficPage() {
             </span>
           </div>
 
-          {devices && (
+          {devices && !Array.isArray(devices) && (
             <div className="space-y-4">
               {/* Mobile */}
               <div className="space-y-1.5">
@@ -588,13 +588,13 @@ export default function AdminTrafficPage() {
                     Mobile Devices (Smartphones)
                   </span>
                   <span className="text-caramel-300 font-bold">
-                    {devices.mobile.percentage}% ({devices.mobile.count.toLocaleString()} views)
+                    {devices.mobile?.percentage ?? 0}% ({(devices.mobile?.count ?? 0).toLocaleString()} views)
                   </span>
                 </div>
                 <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-caramel-500 h-full rounded-full"
-                    style={{ width: `${devices.mobile.percentage}%` }}
+                    style={{ width: `${devices.mobile?.percentage ?? 0}%` }}
                   />
                 </div>
               </div>
@@ -607,13 +607,13 @@ export default function AdminTrafficPage() {
                     Desktop & Laptops
                   </span>
                   <span className="text-caramel-300 font-bold">
-                    {devices.desktop.percentage}% ({devices.desktop.count.toLocaleString()} views)
+                    {devices.desktop?.percentage ?? 0}% ({(devices.desktop?.count ?? 0).toLocaleString()} views)
                   </span>
                 </div>
                 <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-caramel-400/60 h-full rounded-full"
-                    style={{ width: `${devices.desktop.percentage}%` }}
+                    style={{ width: `${devices.desktop?.percentage ?? 0}%` }}
                   />
                 </div>
               </div>
@@ -626,13 +626,13 @@ export default function AdminTrafficPage() {
                     Tablets & iPads
                   </span>
                   <span className="text-caramel-300 font-bold">
-                    {devices.tablet.percentage}% ({devices.tablet.count.toLocaleString()} views)
+                    {devices.tablet?.percentage ?? 0}% ({(devices.tablet?.count ?? 0).toLocaleString()} views)
                   </span>
                 </div>
                 <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-caramel-300/40 h-full rounded-full"
-                    style={{ width: `${devices.tablet.percentage}%` }}
+                    style={{ width: `${devices.tablet?.percentage ?? 0}%` }}
                   />
                 </div>
               </div>
@@ -806,7 +806,7 @@ export default function AdminTrafficPage() {
                           <Laptop className="w-3.5 h-3.5 text-caramel-400" />
                         )}
                         <span className="font-mono text-[11px] text-cream-200">
-                          {v.visitorId.substring(0, 10)}...
+                          {v.visitorId ? (v.visitorId.length > 10 ? v.visitorId.substring(0, 10) + "..." : v.visitorId) : "Visitor"}
                         </span>
                         {v.isCustomer && (
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-caramel-500/20 text-caramel-300">
