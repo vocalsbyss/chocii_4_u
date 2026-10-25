@@ -74,9 +74,15 @@ function resolveDatabaseUrl(): string | undefined {
       if (!fs.existsSync(tmpDbPath) || fs.statSync(tmpDbPath).size === 0) {
         if (foundBundled) {
           fs.copyFileSync(foundBundled, tmpDbPath);
+          try {
+            fs.chmodSync(tmpDbPath, 0o666);
+          } catch {}
         }
       }
       if (fs.existsSync(tmpDbPath)) {
+        try {
+          fs.chmodSync(tmpDbPath, 0o666);
+        } catch {}
         return `file:${tmpDbPath}`;
       }
     } catch (e) {

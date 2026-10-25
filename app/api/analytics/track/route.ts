@@ -77,8 +77,8 @@ export async function POST(req: NextRequest) {
       });
     }
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Analytics tracking error:", error);
-    return NextResponse.json({ success: false }, { status: 500 });
+    return NextResponse.json({ success: false, error: error?.message || "Failed to track" }, { status: 500 });
   }
 }
