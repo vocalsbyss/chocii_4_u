@@ -3,6 +3,9 @@ import Script from "next/script";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import TrafficTracker from "@/components/analytics/TrafficTracker";
 import FestivalBroadcastModal from "@/components/ui/FestivalBroadcastModal";
+import { PreviewProvider } from "@/components/preview/PreviewContext";
+import GlobalPreviewBar from "@/components/preview/GlobalPreviewBar";
+import prisma from "@/lib/prisma";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -58,11 +61,21 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  let homepageStyle = "classic";
+  try {
+    const setting = await prisma.storeSetting.findUnique({
+      where: { key: "homepage_style" },
+    });
+    if (setting?.value) {
+      homepageStyle = setting.value;
+    }
+  } catch (e) {}
+
   return (
     <html lang="en" className="light overflow-x-hidden max-w-full w-full" suppressHydrationWarning>
       <head>
@@ -95,11 +108,14 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body className="min-h-screen bg-[#FAF7F2] text-cocoa-950 antialiased font-sans overflow-x-hidden max-w-full w-full">
-        <ThemeProvider>
-          <FestivalBroadcastModal />
-          <TrafficTracker />
-          {children}
-        </ThemeProvider>
+        <PreviewProvider initialOfficialStyle={homepageStyle}>
+          <ThemeProvider>
+            <GlobalPreviewBar />
+            <FestivalBroadcastModal />
+            <TrafficTracker />
+            {children}
+          </ThemeProvider>
+        </PreviewProvider>
         {/* Razorpay Script for optional client-side modal checkout */}
         <Script
           src="https://checkout.razorpay.com/v1/checkout.js"

@@ -15,6 +15,7 @@ export default function AdminSettingsPage() {
     openingHours: "12:00 PM - 01:00 AM",
     contactPhone: "+91 86883 67177",
     instagramUrl: "https://instagram.com/chocii4u.official",
+    homepage_style: "cooldock",
   });
 
   const [loading, setLoading] = useState(true);
@@ -142,6 +143,76 @@ export default function AdminSettingsPage() {
                 className="sr-only peer"
               />
               <div className="w-12 h-6 bg-cocoa-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            </label>
+          </div>
+        </div>
+
+        {/* Storefront Experience & Showcase Style */}
+        <div className="bg-cocoa-900/60 border border-caramel-500/20 rounded-3xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-cream-100 flex items-center gap-2">
+                <Store className="w-4 h-4 text-caramel-400" />
+                Storefront Showcase Style (Homepage Experience)
+              </h3>
+              <p className="text-xs text-cream-300/60 max-w-xl">
+                Choose the landing experience for visitors. You can preview, test, or undo anytime.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <label
+              className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 ${
+                (settings.homepage_style || "cooldock") === "cooldock"
+                  ? "bg-caramel-500/15 border-caramel-400 text-cream-100 shadow-md ring-1 ring-caramel-400/30"
+                  : "bg-cocoa-950/60 border-white/10 text-cream-300/70 hover:border-white/20"
+              }`}
+            >
+              <input
+                type="radio"
+                name="homepage_style"
+                value="cooldock"
+                checked={(settings.homepage_style || "cooldock") === "cooldock"}
+                onChange={() => setSettings({ ...settings, homepage_style: "cooldock" })}
+                className="mt-1"
+              />
+              <div className="space-y-1">
+                <div className="text-xs font-bold text-cream-100 flex items-center gap-1.5">
+                  <span>CoolDock Interactive Dock & Scroll Transitions</span>
+                  <span className="px-2 py-0.5 rounded-full bg-caramel-500/20 text-caramel-300 text-[9px] font-mono font-bold uppercase">
+                    Modern
+                  </span>
+                </div>
+                <p className="text-[11px] text-cream-300/60 leading-relaxed">
+                  Frosted glass Mac dock with 4 signature creations floating & docking into place as the customer scrolls, smoothly flowing into the menu.
+                </p>
+              </div>
+            </label>
+
+            <label
+              className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 ${
+                settings.homepage_style === "classic"
+                  ? "bg-caramel-500/15 border-caramel-400 text-cream-100 shadow-md ring-1 ring-caramel-400/30"
+                  : "bg-cocoa-950/60 border-white/10 text-cream-300/70 hover:border-white/20"
+              }`}
+            >
+              <input
+                type="radio"
+                name="homepage_style"
+                value="classic"
+                checked={settings.homepage_style === "classic"}
+                onChange={() => setSettings({ ...settings, homepage_style: "classic" })}
+                className="mt-1"
+              />
+              <div className="space-y-1">
+                <div className="text-xs font-bold text-cream-100">
+                  Classic Editorial White Hero
+                </div>
+                <p className="text-[11px] text-cream-300/60 leading-relaxed">
+                  Clean editorial typography layout with high-precision grid watermark, tagline, and direct "Explore Cravings" call to action.
+                </p>
+              </div>
             </label>
           </div>
         </div>

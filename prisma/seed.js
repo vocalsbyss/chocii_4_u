@@ -159,6 +159,7 @@ async function main() {
     { key: "openingHours", value: "12:00 PM - 01:00 AM", description: "Operating hours" },
     { key: "contactPhone", value: "+91 86883 67177", description: "Customer support phone" },
     { key: "instagramUrl", value: "https://instagram.com/chocii4u.official", description: "Official Instagram" },
+    { key: "homepage_style", value: "cooldock", description: "Homepage showcase style: classic or cooldock" },
   ];
 
   for (const setting of defaultSettings) {

@@ -1,34 +1,16 @@
-import prisma from "@/lib/prisma";
-import { getFallbackProducts } from "@/lib/data/fallbackData";
-import { Product } from "@/types";
-import PreviewClientPage from "./PreviewClientPage";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function PreviewPage() {
-  try {
-    const rawProducts = await prisma.product.findMany({
-      where: { isAvailable: true },
-      include: {
-        category: true,
-        addons: {
-          where: { isAvailable: true },
-        },
-      },
-      orderBy: [{ isFeatured: "desc" }, { createdAt: "asc" }],
-    });
+export default function PreviewPage() {
+  // Activate whole-website preview mode via cookie
+  const cookieStore = cookies();
+  cookieStore.set("cravings_preview_mode", "true", {
+    path: "/",
+    maxAge: 604800, // 7 days
+  });
 
-    if (rawProducts && rawProducts.length > 0) {
-      const products: Product[] = rawProducts.map((p) => ({
-        ...p,
-        createdAt: p.createdAt.toISOString(),
-        updatedAt: p.updatedAt.toISOString(),
-      }));
-      return <PreviewClientPage initialProducts={products} />;
-    }
-  } catch (error) {
-    console.warn("PreviewPage: Serving fallback products:", error);
-  }
-
-  return <PreviewClientPage initialProducts={getFallbackProducts()} />;
+  // Redirect to homepage with preview flag so the entire website operates in preview mode
+  redirect("/?preview=1");
 }

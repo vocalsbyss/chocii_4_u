@@ -10,6 +10,8 @@ import CartDrawer from "@/components/ui/CartDrawer";
 import FloatingChocolateCanvas from "@/components/3d/FloatingChocolateCanvas";
 import { Search, Sparkles } from "lucide-react";
 import { Product, Category } from "@/types";
+import { usePreview } from "@/components/preview/PreviewContext";
+import CoolDockCategoryBar from "@/components/ui/CoolDockCategoryBar";
 
 export default function ClientMenuPage({
   initialProducts,
@@ -22,6 +24,8 @@ export default function ClientMenuPage({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { isPreviewActive, isOfficialCoolDock } = usePreview();
+  const isCoolDockMode = isPreviewActive || isOfficialCoolDock;
 
   // Filter products by category and search query
   const filteredProducts = initialProducts.filter((p) => {
@@ -173,6 +177,15 @@ export default function ClientMenuPage({
         onClose={() => setSelectedProduct(null)}
         onAddedToCart={() => setIsCartOpen(true)}
       />
+
+      {/* Interactive CoolDock Floating Category Bar (Preview / CoolDock mode) */}
+      {isCoolDockMode && (
+        <CoolDockCategoryBar
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={(slug) => setSelectedCategory(slug)}
+        />
+      )}
 
       <Footer />
     </div>
