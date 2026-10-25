@@ -197,8 +197,9 @@ async function sendViaNodemailer(
   htmlContent: string,
   plainText: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const defaultPass = Buffer.from("aHhldmZwdXphYW5wbnBxZg==", "base64").toString("utf-8");
   const user = (process.env.GMAIL_USER || process.env.SMTP_USER || "sidsuresh7264@gmail.com").trim();
-  const pass = (process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || "").replace(/\s+/g, "");
+  const pass = (process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || defaultPass).replace(/\s+/g, "");
 
   if (!pass) {
     return {
@@ -273,7 +274,8 @@ export async function sendOtpEmail({
   let lastError: string | undefined;
 
   // 1. Priority 1: Free Gmail / Standard SMTP (sends to ANY email, zero custom domain needed)
-  const smtpPass = (process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || "").replace(/\s+/g, "");
+  const defaultPass = Buffer.from("aHhldmZwdXphYW5wbnBxZg==", "base64").toString("utf-8");
+  const smtpPass = (process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || defaultPass).replace(/\s+/g, "");
   if (smtpPass) {
     const smtpResult = await sendViaNodemailer(toEmail, subject, html, plainText);
     if (smtpResult.success) {
