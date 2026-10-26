@@ -48,3 +48,46 @@ export async function GET(
     );
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const customer = await getCustomerSession();
+    if (!customer) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
+
+    const { id } = params;
+    const body = await req.json();
+    const { paymentMethod } = body;
+
+    const order = await prisma.order.findFirst({
+      where: {
+        OR: [{ id }, { orderNumber: id }],
+      },
+    });
+
+    if (!order || order.customerId !== customer.userId) {
+      return NextResponse.json({ error: "Order not found or access denied" }, { status: 404 });
+    }
+
+    if (order.paymentStatus === "PAID") {
+      return NextResponse.json({ error: "This order has already been paid" }, { status: 400 });
+    }
+
+    const updated = await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        paymentMethod: paymentMethod === "CASH_ON_DELIVERY" ? "CASH_ON_DELIVERY" : order.paymentMethod,
+      },
+    });
+
+    return NextResponse.json({ success: true, order: updated });
+  } catch (error) {
+    console.error("Error updating order payment method:", error);
+    return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
+  }
+}
+

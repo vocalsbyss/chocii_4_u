@@ -12,6 +12,12 @@ export async function GET() {
       settings[item.key] = item.value;
     }
 
+    const envKeyId = process.env.RAZORPAY_KEY_ID || "";
+    const envKeySecret = process.env.RAZORPAY_KEY_SECRET || "";
+
+    const activeKeyId = settings.razorpayKeyId || envKeyId;
+    const activeKeySecret = settings.razorpayKeySecret || envKeySecret;
+
     return NextResponse.json({
       success: true,
       settings: {
@@ -28,6 +34,10 @@ export async function GET() {
         contactPhone: settings.contactPhone || "+91 86883 67177",
         instagramUrl:
           settings.instagramUrl || "https://instagram.com/chocii4u.official",
+        razorpayKeyId: activeKeyId,
+        razorpayKeySecret: activeKeySecret ? "••••••••••••" : "",
+        storeUpiId: settings.storeUpiId || process.env.STORE_UPI_ID || "8688367177@okbizaxis",
+        storeUpiName: settings.storeUpiName || settings.brandName || "chocii 4 u",
       },
     });
   } catch (error) {
@@ -44,6 +54,10 @@ export async function GET() {
         openingHours: "12:00 PM - 01:00 AM",
         contactPhone: "+91 86883 67177",
         instagramUrl: "https://instagram.com/chocii4u.official",
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID || "",
+        razorpayKeySecret: "",
+        storeUpiId: process.env.STORE_UPI_ID || "8688367177@okbizaxis",
+        storeUpiName: "chocii 4 u",
       },
     });
   }
@@ -68,16 +82,25 @@ export async function PUT(req: NextRequest) {
       "openingHours",
       "contactPhone",
       "instagramUrl",
+      "razorpayKeyId",
+      "razorpayKeySecret",
+      "storeUpiId",
+      "storeUpiName",
     ];
 
     for (const key of allowedKeys) {
       if (body[key] !== undefined) {
+        // If razorpayKeySecret was masked with dots and not changed, do not overwrite
+        if (key === "razorpayKeySecret" && String(body[key]).includes("•••")) {
+          continue;
+        }
+
         await prisma.storeSetting.upsert({
           where: { key },
-          update: { value: String(body[key]) },
+          update: { value: String(body[key]).trim() },
           create: {
             key,
-            value: String(body[key]),
+            value: String(body[key]).trim(),
             description: `Store setting for ${key}`,
           },
         });

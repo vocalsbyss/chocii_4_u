@@ -63,6 +63,19 @@ export default function ClientOrderSuccessPage({ order }: { order: Order }) {
                 <span className="text-cream-300/60 mr-1.5">Estimated Time:</span>
                 <strong className="text-cream-100 font-semibold">25–35 Mins</strong>
               </div>
+              <div className="bg-cocoa-950/80 border border-white/10 rounded-xl px-4 py-2 text-xs flex items-center gap-1.5">
+                <span className="text-cream-300/60 mr-1">Payment:</span>
+                {order.paymentStatus === "PAID" ? (
+                  <span className="text-emerald-400 font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    PAID (₹{order.total})
+                  </span>
+                ) : (
+                  <span className="text-amber-400 font-bold">
+                    {order.paymentMethod === "CASH_ON_DELIVERY" ? "Cash on Delivery" : "Payment Pending"} (₹{order.total})
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Quick Actions */}
@@ -145,8 +158,10 @@ export default function ClientOrderSuccessPage({ order }: { order: Order }) {
                 </span>
               </div>
               <div className="flex justify-between text-base font-bold text-cream-100 pt-2 border-t border-white/10">
-                <span>Amount Paid / Due</span>
-                <span className="text-caramel-400 text-lg">₹{order.total}</span>
+                <span>{order.paymentStatus === "PAID" ? "Total Paid Online" : "Amount Due on Delivery"}</span>
+                <span className={order.paymentStatus === "PAID" ? "text-emerald-400 text-lg font-mono" : "text-caramel-400 text-lg font-mono"}>
+                  ₹{order.total}
+                </span>
               </div>
             </div>
           </div>

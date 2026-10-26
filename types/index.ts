@@ -101,7 +101,7 @@ export interface Order {
   deliveryFee: number;
   discount: number;
   total: number;
-  paymentMethod: "RAZORPAY" | "CASH_ON_DELIVERY";
+  paymentMethod: "RAZORPAY" | "CASH_ON_DELIVERY" | "UPI" | "ONLINE_UPI" | "ONLINE_TEST";
   paymentStatus: OrderPaymentStatus;
   fulfillmentStatus: OrderFulfillmentStatus;
   createdAt: string | Date;
@@ -120,6 +120,10 @@ export interface StoreSettings {
   openingHours: string;
   contactPhone: string;
   instagramUrl: string;
+  razorpayKeyId?: string;
+  razorpayKeySecret?: string;
+  storeUpiId?: string;
+  storeUpiName?: string;
 }
 
 export interface CustomerSession {

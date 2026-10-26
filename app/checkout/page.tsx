@@ -22,9 +22,12 @@ import {
   Tag,
   Check,
   X,
+  QrCode,
+  Sparkles,
 } from "lucide-react";
 import { getStoredCart, calculateCartSummary, clearCart } from "@/lib/cart";
 import { CartItem } from "@/types";
+import PaymentModal from "@/components/checkout/PaymentModal";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -41,12 +44,25 @@ export default function CheckoutPage() {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [landmark, setLandmark] = useState("");
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"CASH_ON_DELIVERY" | "RAZORPAY">(
-    "CASH_ON_DELIVERY"
+  const [paymentMethod, setPaymentMethod] = useState<"ONLINE" | "CASH_ON_DELIVERY">(
+    "ONLINE"
   );
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Payment Modal State
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentModalData, setPaymentModalData] = useState<{
+    orderId: string;
+    orderNumber: string;
+    totalAmount: number;
+    upiId: string;
+    upiName: string;
+    isConfigured: boolean;
+    keyId?: string;
+    razorpayOrderId?: string;
+  } | null>(null);
 
   // Coupon & Offers State
   const [couponCodeInput, setCouponCodeInput] = useState("");
@@ -137,6 +153,28 @@ export default function CheckoutPage() {
     setCouponSuccess(null);
   };
 
+  const handlePaymentSuccess = (orderNumber: string) => {
+    clearCart();
+    setPaymentModalOpen(false);
+    router.push(`/order-success/${orderNumber}`);
+  };
+
+  const handleSwitchToCod = async () => {
+    if (!paymentModalData) return;
+    const res = await fetch(`/api/orders/${paymentModalData.orderId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentMethod: "CASH_ON_DELIVERY" }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Failed to switch to Cash on Delivery.");
+    }
+    clearCart();
+    setPaymentModalOpen(false);
+    router.push(`/order-success/${paymentModalData.orderNumber}`);
+  };
+
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -165,7 +203,7 @@ export default function CheckoutPage() {
           deliveryAddress: deliveryAddress.trim(),
           landmark: landmark.trim() || undefined,
           specialInstructions: deliveryInstructions.trim() || undefined,
-          paymentMethod,
+          paymentMethod: paymentMethod === "ONLINE" ? "RAZORPAY" : "CASH_ON_DELIVERY",
           couponCode: appliedCoupon ? appliedCoupon.code : undefined,
           items: cart.map((item) => ({
             productId: item.productId,
@@ -182,8 +220,8 @@ export default function CheckoutPage() {
         throw new Error(data.error || "Failed to place order.");
       }
 
-      // If Razorpay online payment selected
-      if (paymentMethod === "RAZORPAY") {
+      // If Online Payment selected (Instant UPI, Cards, NetBanking, Razorpay)
+      if (paymentMethod === "ONLINE") {
         const payInitRes = await fetch("/api/payments/create-order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -191,47 +229,30 @@ export default function CheckoutPage() {
         });
         const payData = await payInitRes.json();
 
-        if (payData.isConfigured && typeof (window as any).Razorpay !== "undefined") {
-          // Open real Razorpay checkout modal
-          const rzp = new (window as any).Razorpay({
-            key: payData.keyId,
-            amount: payData.amount,
-            currency: payData.currency,
-            name: "chocii 4 u",
-            description: `Order ${data.order.orderNumber}`,
-            order_id: payData.razorpayOrderId,
-            handler: async function (response: any) {
-              await fetch("/api/payments/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  orderId: data.order.id,
-                  razorpayOrderId: response.razorpay_order_id,
-                  razorpayPaymentId: response.razorpay_payment_id,
-                  razorpaySignature: response.razorpay_signature,
-                }),
-              });
-              clearCart();
-              router.push(`/order-success/${data.order.orderNumber}`);
-            },
-            prefill: {
-              name: fullName,
-              contact: phone,
-              email: email || undefined,
-            },
-            theme: { color: "#C58A55" },
-          });
-          rzp.open();
-          return;
+        if (!payInitRes.ok || !payData.success) {
+          throw new Error(payData.error || "Failed to initialize payment gateway order.");
         }
+
+        setPaymentModalData({
+          orderId: data.order.id,
+          orderNumber: data.order.orderNumber,
+          totalAmount: data.order.total,
+          upiId: payData.upiId || "8688367177@okbizaxis",
+          upiName: payData.upiName || "chocii 4 u",
+          isConfigured: Boolean(payData.isConfigured),
+          keyId: payData.keyId,
+          razorpayOrderId: payData.razorpayOrderId,
+        });
+        setPaymentModalOpen(true);
+        setLoading(false);
+        return;
       }
 
-      // Order saved in database! Clear cart and route to order confirmation
+      // Cash on Delivery: Order saved in database! Clear cart and route to order confirmation
       clearCart();
       router.push(`/order-success/${data.order.orderNumber}`);
     } catch (err: any) {
       setErrorMessage(err.message || "An error occurred while placing your order.");
-    } finally {
       setLoading(false);
     }
   };
@@ -385,12 +406,44 @@ export default function CheckoutPage() {
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Online Payment (UPI, Cards, NetBanking) */}
+                  <label
+                    onClick={() => setPaymentMethod("ONLINE")}
+                    className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${
+                      paymentMethod === "ONLINE"
+                        ? "border-caramel-500 bg-caramel-500/15 ring-1 ring-caramel-500 shadow-md"
+                        : "border-white/10 bg-cocoa-950/40 hover:border-white/20"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      checked={paymentMethod === "ONLINE"}
+                      onChange={() => setPaymentMethod("ONLINE")}
+                      className="mt-1 text-caramel-500 focus:ring-caramel-500"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-caramel-400" />
+                        <span className="text-xs font-bold text-cream-100">
+                          Instant UPI & Online Payment
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-cream-300/70 mt-1">
+                        Pay via Google Pay, PhonePe, Paytm, dynamic UPI QR, or Debit/Credit Cards.
+                      </p>
+                      <span className="inline-block mt-2 text-[10px] uppercase font-bold tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-mono">
+                        Instant Confirmation
+                      </span>
+                    </div>
+                  </label>
+
                   {/* Cash on Delivery */}
                   <label
                     onClick={() => setPaymentMethod("CASH_ON_DELIVERY")}
                     className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${
                       paymentMethod === "CASH_ON_DELIVERY"
-                        ? "border-caramel-500 bg-caramel-500/15 ring-1 ring-caramel-500"
+                        ? "border-caramel-500 bg-caramel-500/15 ring-1 ring-caramel-500 shadow-md"
                         : "border-white/10 bg-cocoa-950/40 hover:border-white/20"
                     }`}
                   >
@@ -405,40 +458,11 @@ export default function CheckoutPage() {
                       <div className="flex items-center gap-2">
                         <Banknote className="w-4 h-4 text-caramel-400" />
                         <span className="text-xs font-bold text-cream-100">
-                          Cash / UPI on Delivery
+                          Cash / Pay on Delivery
                         </span>
                       </div>
-                      <p className="text-[11px] text-cream-300/60 mt-1">
+                      <p className="text-[11px] text-cream-300/70 mt-1">
                         Pay to the delivery partner in cash or scan QR upon arrival.
-                      </p>
-                    </div>
-                  </label>
-
-                  {/* Online Payment (Razorpay) */}
-                  <label
-                    onClick={() => setPaymentMethod("RAZORPAY")}
-                    className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${
-                      paymentMethod === "RAZORPAY"
-                        ? "border-caramel-500 bg-caramel-500/15 ring-1 ring-caramel-500"
-                        : "border-white/10 bg-cocoa-950/40 hover:border-white/20"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === "RAZORPAY"}
-                      onChange={() => setPaymentMethod("RAZORPAY")}
-                      className="mt-1 text-caramel-500 focus:ring-caramel-500"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-caramel-400" />
-                        <span className="text-xs font-bold text-cream-100">
-                          Razorpay (Cards / UPI / NetBanking)
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-cream-300/60 mt-1">
-                        Fast, encrypted online checkout via Razorpay gateway.
                       </p>
                     </div>
                   </label>
@@ -600,11 +624,16 @@ export default function CheckoutPage() {
                 {loading ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    Saving Order & Notifying Kitchen...
+                    Connecting to Payment Gateway...
+                  </>
+                ) : paymentMethod === "ONLINE" ? (
+                  <>
+                    Proceed to Pay (₹{finalGrandTotal})
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 ) : (
                   <>
-                    Place Order Directly (₹{finalGrandTotal})
+                    Place Order (Cash on Delivery — ₹{finalGrandTotal})
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -618,6 +647,27 @@ export default function CheckoutPage() {
           </form>
         </div>
       </main>
+
+      {/* Interactive Payment Gateway & UPI Modal */}
+      {paymentModalData && (
+        <PaymentModal
+          isOpen={paymentModalOpen}
+          onClose={() => setPaymentModalOpen(false)}
+          orderId={paymentModalData.orderId}
+          orderNumber={paymentModalData.orderNumber}
+          totalAmount={paymentModalData.totalAmount}
+          upiId={paymentModalData.upiId}
+          upiName={paymentModalData.upiName}
+          isConfigured={paymentModalData.isConfigured}
+          keyId={paymentModalData.keyId}
+          razorpayOrderId={paymentModalData.razorpayOrderId}
+          customerName={fullName}
+          customerPhone={phone}
+          customerEmail={email || undefined}
+          onSuccess={handlePaymentSuccess}
+          onSwitchToCod={handleSwitchToCod}
+        />
+      )}
 
       <Footer />
     </div>

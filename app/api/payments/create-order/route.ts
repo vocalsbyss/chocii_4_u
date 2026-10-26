@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCustomerSession } from "@/lib/auth";
-import { createRazorpayOrder, isRazorpayConfigured } from "@/lib/razorpay";
+import { createRazorpayOrder, getStoreUpiDetails } from "@/lib/razorpay";
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,13 +27,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "This order has already been paid" }, { status: 400 });
     }
 
-    const razorpayData = await createRazorpayOrder(order.total, order.orderNumber);
+    const [razorpayData, upiDetails] = await Promise.all([
+      createRazorpayOrder(order.total, order.orderNumber),
+      getStoreUpiDetails(),
+    ]);
 
-    // Save payment record
+    // Save or update pending payment record
     await prisma.paymentRecord.create({
       data: {
         orderId: order.id,
-        provider: "RAZORPAY",
+        provider: razorpayData.isConfigured ? "RAZORPAY" : "UPI_QR",
         providerOrderId: razorpayData.orderId,
         amount: order.total,
         status: "PENDING",
@@ -47,6 +50,11 @@ export async function POST(req: NextRequest) {
       amount: razorpayData.amount,
       currency: razorpayData.currency,
       keyId: razorpayData.keyId,
+      upiId: upiDetails.upiId,
+      upiName: upiDetails.upiName,
+      totalAmount: order.total,
+      orderNumber: order.orderNumber,
+      orderId: order.id,
     });
   } catch (error) {
     console.error("Error creating payment order:", error);

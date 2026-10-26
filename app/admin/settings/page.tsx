@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Check, RefreshCw, AlertCircle, Save, Store, Truck, Clock, Phone, Instagram } from "lucide-react";
+import { Check, RefreshCw, AlertCircle, Save, Store, Truck, Clock, Phone, Instagram, CreditCard, QrCode, ShieldCheck } from "lucide-react";
 import { StoreSettings } from "@/types";
 
 export default function AdminSettingsPage() {
@@ -15,6 +15,10 @@ export default function AdminSettingsPage() {
     openingHours: "12:00 PM - 01:00 AM",
     contactPhone: "+91 86883 67177",
     instagramUrl: "https://instagram.com/chocii4u.official",
+    razorpayKeyId: "",
+    razorpayKeySecret: "",
+    storeUpiId: "8688367177@okbizaxis",
+    storeUpiName: "chocii 4 u",
   });
 
   const [loading, setLoading] = useState(true);
@@ -264,6 +268,99 @@ export default function AdminSettingsPage() {
                 placeholder="https://instagram.com/chocii4u.official"
                 className="w-full bg-cocoa-950/80 border border-white/10 rounded-xl px-4 py-3 text-xs text-cream-100 focus:outline-none focus:border-caramel-500"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Gateway & UPI Configuration */}
+        <div className="bg-cocoa-900/60 border border-caramel-500/20 rounded-3xl p-6 space-y-5">
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-caramel-400 flex items-center gap-2">
+              <CreditCard className="w-4 h-4" />
+              Online Payment & UPI Configuration
+            </h3>
+            <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" />
+              Active System
+            </span>
+          </div>
+
+          <p className="text-xs text-cream-300/70">
+            Configure direct UPI (Google Pay, PhonePe, Paytm QR) and Razorpay gateway credentials. When configured here, customer payments work immediately without needing server redeploys.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-cream-200 flex items-center gap-1.5">
+                <QrCode className="w-3.5 h-3.5 text-caramel-400" />
+                Store UPI ID (VPA)
+              </label>
+              <input
+                type="text"
+                value={settings.storeUpiId || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, storeUpiId: e.target.value })
+                }
+                placeholder="e.g. 8688367177@okbizaxis or 8688367177@ybl"
+                className="w-full bg-cocoa-950/80 border border-white/10 rounded-xl px-4 py-3 text-xs text-cream-100 focus:outline-none focus:border-caramel-500 font-mono"
+              />
+              <p className="text-[11px] text-cream-300/40">
+                Used to generate dynamic instant UPI QR codes and 1-tap PhonePe/GPay links.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-cream-200">
+                UPI Payee Business Name
+              </label>
+              <input
+                type="text"
+                value={settings.storeUpiName || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, storeUpiName: e.target.value })
+                }
+                placeholder="chocii 4 u"
+                className="w-full bg-cocoa-950/80 border border-white/10 rounded-xl px-4 py-3 text-xs text-cream-100 focus:outline-none focus:border-caramel-500"
+              />
+              <p className="text-[11px] text-cream-300/40">
+                Displayed as receiver name inside customer UPI apps upon scan.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-cream-200">
+                Razorpay Key ID (Optional)
+              </label>
+              <input
+                type="text"
+                value={settings.razorpayKeyId || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, razorpayKeyId: e.target.value })
+                }
+                placeholder="rzp_live_... or rzp_test_..."
+                className="w-full bg-cocoa-950/80 border border-white/10 rounded-xl px-4 py-3 text-xs text-cream-100 focus:outline-none focus:border-caramel-500 font-mono"
+              />
+              <p className="text-[11px] text-cream-300/40">
+                Find this in your Razorpay Dashboard &rarr; Settings &rarr; API Keys.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-cream-200">
+                Razorpay Key Secret (Optional)
+              </label>
+              <input
+                type="password"
+                value={settings.razorpayKeySecret || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, razorpayKeySecret: e.target.value })
+                }
+                placeholder="Enter new secret or leave blank to keep unchanged"
+                className="w-full bg-cocoa-950/80 border border-white/10 rounded-xl px-4 py-3 text-xs text-cream-100 focus:outline-none focus:border-caramel-500 font-mono"
+              />
+              <p className="text-[11px] text-cream-300/40">
+                Kept secure and encrypted. Used for signature verification.
+              </p>
             </div>
           </div>
         </div>
